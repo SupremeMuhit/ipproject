@@ -3,288 +3,163 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Learn how to protect yourself from online scams. Essential tips and strategies to stay safe in the digital world.">
-  <title>How to Avoid Being Scammed | Stay Safe Online</title>
+  <title>Space Defender Elite | 3D Space Shooter</title>
   <link rel="stylesheet" href="style.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+  <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
 </head>
 <body>
-  <!-- Hero Section -->
-  <section class="hero" id="hero">
-    <div class="hero-background"></div>
-    <div class="container">
-      <div class="hero-content">
-        <h1 class="hero-title fade-in">
-          <span class="gradient-text">Don't Get Scammed</span>
-        </h1>
-        <p class="hero-subtitle fade-in-delay-1">
-          Learn how to protect yourself from online fraud, phishing, and digital deception in 2026
-        </p>
-        <div class="hero-stats fade-in-delay-2">
-          <div class="stat-card">
-            <div class="stat-number">$10B+</div>
-            <div class="stat-label">Lost to scams annually</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-number">300M</div>
-            <div class="stat-label">Phishing emails sent daily</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-number">1 in 4</div>
-            <div class="stat-label">People fall victim</div>
-          </div>
-        </div>
-        <a href="#scam-types" class="cta-button fade-in-delay-3">
-          <span>Learn Protection Strategies</span>
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </a>
+  <!-- Loading Screen -->
+  <div id="loading-screen">
+    <div class="loading-content">
+      <h1 class="loading-title">SPACE DEFENDER ELITE</h1>
+      <div class="loading-bar-container">
+        <div class="loading-bar" id="loadingBar"></div>
       </div>
+      <p class="loading-text">Initializing weapon systems...</p>
     </div>
-    <div class="scroll-indicator">
-      <div class="scroll-arrow"></div>
-    </div>
-  </section>
+  </div>
 
-  <!-- Common Scam Types Section -->
-  <section class="scam-types" id="scam-types">
-    <div class="container">
-      <h2 class="section-title">
-        <span class="title-accent">⚠️</span>
-        Common Scam Types
-      </h2>
-      <p class="section-subtitle">Know your enemy. These are the most prevalent scams in 2026.</p>
+  <!-- Start Menu -->
+  <div id="start-menu">
+    <div class="menu-content">
+      <h1 class="game-title">
+        <span class="title-word">SPACE</span>
+        <span class="title-word">DEFENDER</span>
+        <span class="title-word elite">ELITE</span>
+      </h1>
+      <p class="game-subtitle">Defend Earth from the alien invasion</p>
       
-      <div class="scam-grid">
-        <!-- Phishing -->
-        <div class="scam-card" data-type="phishing">
-          <div class="scam-icon">🎣</div>
-          <h3 class="scam-title">Phishing Attacks</h3>
-          <p class="scam-description">
-            Fake emails or messages pretending to be from legitimate companies asking for passwords, credit cards, or personal information.
-          </p>
-          <div class="scam-warning">
-            <strong>Red Flags:</strong> Urgent language, suspicious links, spelling errors, requests for passwords
-          </div>
-        </div>
+      <div class="menu-buttons">
+        <button class="menu-btn start-btn" id="startBtn">
+          <span>START MISSION</span>
+          <div class="btn-glow"></div>
+        </button>
+        <button class="menu-btn" id="controlsBtn">CONTROLS</button>
+      </div>
 
-        <!-- Romance Scams -->
-        <div class="scam-card" data-type="romance">
-          <div class="scam-icon">💔</div>
-          <h3 class="scam-title">Romance Scams</h3>
-          <p class="scam-description">
-            Scammers create fake dating profiles to build romantic relationships, then ask for money for "emergencies" or travel.
-          </p>
-          <div class="scam-warning">
-            <strong>Red Flags:</strong> Too good to be true, quick love declarations, sob stories, asking for money
-          </div>
-        </div>
-
-        <!-- Investment Scams -->
-        <div class="scam-card" data-type="investment">
-          <div class="scam-icon">📈</div>
-          <h3 class="scam-title">Investment Fraud</h3>
-          <p class="scam-description">
-            Promises of guaranteed high returns with little risk. Includes cryptocurrency scams, Ponzi schemes, and "get rich quick" offers.
-          </p>
-          <div class="scam-warning">
-            <strong>Red Flags:</strong> Guaranteed returns, pressure to invest quickly, unregistered investments
-          </div>
-        </div>
-
-        <!-- Tech Support -->
-        <div class="scam-card" data-type="tech">
-          <div class="scam-icon">💻</div>
-          <h3 class="scam-title">Tech Support Scams</h3>
-          <p class="scam-description">
-            Fake pop-ups or calls claiming your computer has a virus, demanding payment to fix non-existent problems.
-          </p>
-          <div class="scam-warning">
-            <strong>Red Flags:</strong> Unsolicited calls, scary warnings, remote access requests, upfront payments
-          </div>
-        </div>
-
-        <!-- Online Shopping -->
-        <div class="scam-card" data-type="shopping">
-          <div class="scam-icon">🛒</div>
-          <h3 class="scam-title">Fake Online Stores</h3>
-          <p class="scam-description">
-            Websites that look legitimate but sell counterfeit goods or simply take your money without delivering products.
-          </p>
-          <div class="scam-warning">
-            <strong>Red Flags:</strong> Too-cheap prices, no contact info, unsecure checkout, poor reviews
-          </div>
-        </div>
-
-        <!-- Impersonation -->
-        <div class="scam-card" data-type="impersonation">
-          <div class="scam-icon">🎭</div>
-          <h3 class="scam-title">Impersonation Scams</h3>
-          <p class="scam-description">
-            Scammers pretend to be government officials, IRS agents, or company representatives demanding immediate payment.
-          </p>
-          <div class="scam-warning">
-            <strong>Red Flags:</strong> Threats, demands for gift cards, caller ID spoofing, tax/legal threats
-          </div>
+      <div class="stats-display">
+        <div class="stat-item">
+          <span class="stat-label">HIGH SCORE</span>
+          <span class="stat-value" id="highScore">0</span>
         </div>
       </div>
     </div>
-  </section>
+  </div>
 
-  <!-- Protection Strategies Section -->
-  <section class="protection-section">
-    <div class="container">
-      <h2 class="section-title">
-        <span class="title-accent">🛡️</span>
-        Your Protection Arsenal
-      </h2>
-      <p class="section-subtitle">Follow these proven strategies to stay safe online.</p>
-
-      <div class="protection-grid">
-        <div class="protection-item">
-          <div class="protection-number">01</div>
-          <h3>Verify Everything</h3>
-          <p>Never trust caller ID, email addresses, or websites at face value. Independently verify by calling official numbers or visiting official websites directly (not through links).</p>
+  <!-- Controls Screen -->
+  <div id="controls-screen" class="hidden">
+    <div class="controls-content">
+      <h2>CONTROLS</h2>
+      <div class="controls-grid">
+        <div class="control-item">
+          <span class="key">W / ↑</span>
+          <span class="action">Move Forward</span>
         </div>
-
-        <div class="protection-item">
-          <div class="protection-number">02</div>
-          <h3>Never Share Passwords</h3>
-          <p>Legitimate companies will NEVER ask for your password, PIN, or security codes. Not via email, not via phone, not ever. If asked, it's a scam.</p>
+        <div class="control-item">
+          <span class="key">S / ↓</span>
+          <span class="action">Move Backward</span>
         </div>
-
-        <div class="protection-item">
-          <div class="protection-number">03</div>
-          <h3>Use Two-Factor Authentication</h3>
-          <p>Enable 2FA on all important accounts. Even if scammers get your password, they can't access your account without the second factor.</p>
+        <div class="control-item">
+          <span class="key">A / ←</span>
+          <span class="action">Move Left</span>
         </div>
-
-        <div class="protection-item">
-          <div class="protection-number">04</div>
-          <h3>Think Before You Click</h3>
-          <p>Hover over links to see where they really go. Don't click suspicious links in emails or texts. When in doubt, type the URL directly into your browser.</p>
+        <div class="control-item">
+          <span class="key">D / →</span>
+          <span class="action">Move Right</span>
         </div>
-
-        <div class="protection-item">
-          <div class="protection-number">05</div>
-          <h3>Slow Down & Question Urgency</h3>
-          <p>Scammers use urgency to make you act without thinking. Take your time. Legitimate businesses won't pressure you into immediate decisions.</p>
+        <div class="control-item">
+          <span class="key">SPACE</span>
+          <span class="action">Fire Weapon</span>
         </div>
-
-        <div class="protection-item">
-          <div class="protection-number">06</div>
-          <h3>Protect Your Information</h3>
-          <p>Never give out your Social Security number, bank details, or personal information unless you initiated the contact and verified the recipient.</p>
-        </div>
-
-        <div class="protection-item">
-          <div class="protection-number">07</div>
-          <h3>Research Before Investing</h3>
-          <p>If it sounds too good to be true, it is. Research investments thoroughly. Check if the company is registered with regulatory authorities.</p>
-        </div>
-
-        <div class="protection-item">
-          <div class="protection-number">08</div>
-          <h3>Use Secure Payment Methods</h3>
-          <p>Credit cards and PayPal offer fraud protection. Avoid wire transfers, gift cards, or cryptocurrency for purchases—these are untraceable.</p>
-        </div>
-
-        <div class="protection-item">
-          <div class="protection-number">09</div>
-          <h3>Keep Software Updated</h3>
-          <p>Update your operating system, browser, and antivirus regularly. Many scams exploit known security vulnerabilities in outdated software.</p>
-        </div>
-
-        <div class="protection-item">
-          <div class="protection-number">10</div>
-          <h3>Trust Your Instincts</h3>
-          <p>If something feels off, it probably is. Don't let embarrassment or fear prevent you from walking away or asking for a second opinion.</p>
+        <div class="control-item">
+          <span class="key">MOUSE</span>
+          <span class="action">Aim</span>
         </div>
       </div>
+      <button class="menu-btn" id="backBtn">BACK</button>
     </div>
-  </section>
+  </div>
 
-  <!-- What to Do If Scammed Section -->
-  <section class="action-section">
-    <div class="container">
-      <div class="action-box">
-        <h2 class="action-title">Already Been Scammed?</h2>
-        <p class="action-subtitle">Act immediately to minimize damage:</p>
-        
-        <div class="action-steps">
-          <div class="action-step">
-            <div class="action-icon">🏦</div>
-            <div class="action-content">
-              <h4>Contact Your Bank</h4>
-              <p>Report fraudulent transactions immediately. Freeze accounts if necessary.</p>
-            </div>
-          </div>
-
-          <div class="action-step">
-            <div class="action-icon">🔐</div>
-            <div class="action-content">
-              <h4>Change Passwords</h4>
-              <p>Update passwords for all accounts, especially if you shared credentials.</p>
-            </div>
-          </div>
-
-          <div class="action-step">
-            <div class="action-icon">📞</div>
-            <div class="action-content">
-              <h4>Report to Authorities</h4>
-              <p>File reports with local police and national fraud agencies (FTC, IC3, etc.).</p>
-            </div>
-          </div>
-
-          <div class="action-step">
-            <div class="action-icon">📋</div>
-            <div class="action-content">
-              <h4>Document Everything</h4>
-              <p>Save emails, texts, screenshots, and transaction records as evidence.</p>
-            </div>
-          </div>
-        </div>
+  <!-- Game HUD -->
+  <div id="game-hud" class="hidden">
+    <div class="hud-top">
+      <div class="hud-item">
+        <span class="hud-label">SCORE</span>
+        <span class="hud-value" id="score">0</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">WAVE</span>
+        <span class="hud-value" id="wave">1</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">ENEMIES</span>
+        <span class="hud-value" id="enemies">0</span>
       </div>
     </div>
-  </section>
 
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="container">
-      <div class="footer-content">
-        <div class="footer-section">
-          <h3>Stay Vigilant</h3>
-          <p>Remember: Scammers are constantly evolving their tactics. Stay informed, stay skeptical, and stay safe.</p>
+    <div class="hud-bottom">
+      <div class="health-bar-container">
+        <span class="hud-label">HULL INTEGRITY</span>
+        <div class="health-bar">
+          <div class="health-fill" id="healthFill"></div>
         </div>
-        
-        <div class="footer-section">
-          <h3>Report Scams</h3>
-          <ul class="footer-links">
-            <li><a href="https://reportfraud.ftc.gov/" target="_blank">FTC Report Fraud</a></li>
-            <li><a href="https://www.ic3.gov/" target="_blank">FBI IC3</a></li>
-            <li><a href="https://www.usa.gov/stop-scams-frauds" target="_blank">USA.gov Scam Resources</a></li>
-          </ul>
-        </div>
-
-        <div class="footer-section">
-          <h3>Learn More</h3>
-          <ul class="footer-links">
-            <li><a href="https://consumer.ftc.gov/features/scam-alerts" target="_blank">FTC Scam Alerts</a></li>
-            <li><a href="https://www.aarp.org/money/scams-fraud/" target="_blank">AARP Fraud Watch</a></li>
-            <li><a href="https://www.consumer.ftc.gov/" target="_blank">Consumer Protection</a></li>
-          </ul>
-        </div>
+        <span class="health-value" id="healthValue">100%</span>
       </div>
       
-      <div class="footer-bottom">
-        <p>&copy; 2026 Anti-Scam Education. Stay safe online.</p>
+      <div class="weapon-status">
+        <span class="hud-label">WEAPON</span>
+        <div class="weapon-cooldown" id="weaponCooldown"></div>
       </div>
     </div>
-  </footer>
 
-  <script src="script.js"></script>
+    <div class="crosshair"></div>
+  </div>
+
+  <!-- Game Over Screen -->
+  <div id="game-over" class="hidden">
+    <div class="game-over-content">
+      <h1 class="game-over-title">MISSION FAILED</h1>
+      <p class="game-over-subtitle">Earth has fallen to the alien forces</p>
+      
+      <div class="final-stats">
+        <div class="final-stat">
+          <span class="stat-label">FINAL SCORE</span>
+          <span class="stat-value" id="finalScore">0</span>
+        </div>
+        <div class="final-stat">
+          <span class="stat-label">WAVES SURVIVED</span>
+          <span class="stat-value" id="finalWave">0</span>
+        </div>
+        <div class="final-stat">
+          <span class="stat-label">ENEMIES DESTROYED</span>
+          <span class="stat-value" id="enemiesKilled">0</span>
+        </div>
+      </div>
+
+      <button class="menu-btn start-btn" id="restartBtn">
+        <span>TRY AGAIN</span>
+        <div class="btn-glow"></div>
+      </button>
+      <button class="menu-btn" id="menuBtn">MAIN MENU</button>
+    </div>
+  </div>
+
+  <!-- Game Canvas -->
+  <canvas id="gameCanvas"></canvas>
+
+  <!-- Audio (background music and effects) -->
+  <audio id="bgMusic" loop>
+    <source src="data:audio/wav;base64,..." type="audio/wav">
+  </audio>
+
+  <script type="module" src="script.js"></script>
 </body>
 </html>
