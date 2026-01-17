@@ -40,8 +40,8 @@ export default {
     // Log to Workers console (owner-only, visible in dashboard)
     console.log(JSON.stringify(logEntry));
     
-    // Forward request to Cloudflare Pages
-    // This passes the request through without modification
-    return fetch(request);
+    // Fetch the website from Pages and return it
+    const pagesUrl = `https://fluppy.pages.dev${path}${url.search}`;
+    return fetch(pagesUrl);
   }
 };

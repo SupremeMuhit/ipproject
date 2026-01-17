@@ -1,7 +1,7 @@
 # Cloudflare Workers Configuration
 # Choose ONE of the worker files to deploy
 
-name = "ip-logger"
+name = "fluppy"
 main = "workers/basic-ip-logger.js"  # Change this to use different implementations
 compatibility_date = "2024-01-01"
 
