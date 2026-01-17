@@ -3,163 +3,92 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Space Defender Elite | 3D Space Shooter</title>
+  <title>EVENT HORIZON | Physics Simulation</title>
   <link rel="stylesheet" href="style.css">
   <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
   <script type="importmap">
     {
       "imports": {
         "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "cannon-es": "https://unpkg.com/cannon-es@0.20.0/dist/cannon-es.js"
       }
     }
   </script>
 </head>
 <body>
-  <!-- Loading Screen -->
-  <div id="loading-screen">
-    <div class="loading-content">
-      <h1 class="loading-title">SPACE DEFENDER ELITE</h1>
-      <div class="loading-bar-container">
-        <div class="loading-bar" id="loadingBar"></div>
-      </div>
-      <p class="loading-text">Initializing weapon systems...</p>
-    </div>
-  </div>
+  <!-- Cinematic Overlay -->
+  <div class="vignette"></div>
+  <div class="scanlines"></div>
+  <div class="noise"></div>
 
-  <!-- Start Menu -->
-  <div id="start-menu">
-    <div class="menu-content">
-      <h1 class="game-title">
-        <span class="title-word">SPACE</span>
-        <span class="title-word">DEFENDER</span>
-        <span class="title-word elite">ELITE</span>
-      </h1>
-      <p class="game-subtitle">Defend Earth from the alien invasion</p>
-      
-      <div class="menu-buttons">
-        <button class="menu-btn start-btn" id="startBtn">
-          <span>START MISSION</span>
-          <div class="btn-glow"></div>
-        </button>
-        <button class="menu-btn" id="controlsBtn">CONTROLS</button>
-      </div>
-
-      <div class="stats-display">
-        <div class="stat-item">
-          <span class="stat-label">HIGH SCORE</span>
-          <span class="stat-value" id="highScore">0</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Controls Screen -->
-  <div id="controls-screen" class="hidden">
-    <div class="controls-content">
-      <h2>CONTROLS</h2>
-      <div class="controls-grid">
-        <div class="control-item">
-          <span class="key">W / ↑</span>
-          <span class="action">Move Forward</span>
-        </div>
-        <div class="control-item">
-          <span class="key">S / ↓</span>
-          <span class="action">Move Backward</span>
-        </div>
-        <div class="control-item">
-          <span class="key">A / ←</span>
-          <span class="action">Move Left</span>
-        </div>
-        <div class="control-item">
-          <span class="key">D / →</span>
-          <span class="action">Move Right</span>
-        </div>
-        <div class="control-item">
-          <span class="key">SPACE</span>
-          <span class="action">Fire Weapon</span>
-        </div>
-        <div class="control-item">
-          <span class="key">MOUSE</span>
-          <span class="action">Aim</span>
-        </div>
-      </div>
-      <button class="menu-btn" id="backBtn">BACK</button>
-    </div>
-  </div>
-
-  <!-- Game HUD -->
-  <div id="game-hud" class="hidden">
-    <div class="hud-top">
-      <div class="hud-item">
-        <span class="hud-label">SCORE</span>
-        <span class="hud-value" id="score">0</span>
-      </div>
-      <div class="hud-item">
-        <span class="hud-label">WAVE</span>
-        <span class="hud-value" id="wave">1</span>
-      </div>
-      <div class="hud-item">
-        <span class="hud-label">ENEMIES</span>
-        <span class="hud-value" id="enemies">0</span>
-      </div>
+  <!-- Intro / Menu -->
+  <div id="ui-layer">
+    <div class="header">
+      <h1>EVENT HORIZON</h1>
+      <div class="subtitle">HEAVY PHYSICS SIMULATION</div>
     </div>
 
-    <div class="hud-bottom">
-      <div class="health-bar-container">
-        <span class="hud-label">HULL INTEGRITY</span>
-        <div class="health-bar">
-          <div class="health-fill" id="healthFill"></div>
+    <div id="main-menu">
+      <div class="stats-box">
+        <div class="stat-row">
+          <span class="label">PHYSICS ENGINE</span>
+          <span class="value">CANNON.JS v0.20</span>
         </div>
-        <span class="health-value" id="healthValue">100%</span>
-      </div>
-      
-      <div class="weapon-status">
-        <span class="hud-label">WEAPON</span>
-        <div class="weapon-cooldown" id="weaponCooldown"></div>
-      </div>
-    </div>
-
-    <div class="crosshair"></div>
-  </div>
-
-  <!-- Game Over Screen -->
-  <div id="game-over" class="hidden">
-    <div class="game-over-content">
-      <h1 class="game-over-title">MISSION FAILED</h1>
-      <p class="game-over-subtitle">Earth has fallen to the alien forces</p>
-      
-      <div class="final-stats">
-        <div class="final-stat">
-          <span class="stat-label">FINAL SCORE</span>
-          <span class="stat-value" id="finalScore">0</span>
+        <div class="stat-row">
+          <span class="label">RENDERER</span>
+          <span class="value">WEBGL 2.0 + BLOOM</span>
         </div>
-        <div class="final-stat">
-          <span class="stat-label">WAVES SURVIVED</span>
-          <span class="stat-value" id="finalWave">0</span>
-        </div>
-        <div class="final-stat">
-          <span class="stat-label">ENEMIES DESTROYED</span>
-          <span class="stat-value" id="enemiesKilled">0</span>
+        <div class="stat-row">
+          <span class="label">HIGH SCORE</span>
+          <span class="value" id="menuHighScore">0</span>
         </div>
       </div>
 
-      <button class="menu-btn start-btn" id="restartBtn">
-        <span>TRY AGAIN</span>
-        <div class="btn-glow"></div>
+      <button id="start-btn" class="cyber-btn">
+        <span class="btn-text">INITIALIZE SIMULATION</span>
+        <span class="btn-glitch"></span>
       </button>
-      <button class="menu-btn" id="menuBtn">MAIN MENU</button>
+
+      <div class="controls-hint">
+        [WASD] THRUSTers &nbsp; [MOUSE] AIM &nbsp; [CLICK] RAILGUN &nbsp; [SPACE] BRAKE
+      </div>
+    </div>
+
+    <!-- HUD (Hidden initially) -->
+    <div id="hud" class="hidden">
+      <div class="hud-top-left">
+        <div class="bar-label">SHIELD INTEGRITY</div>
+        <div class="bar-container">
+          <div id="health-bar" class="bar-fill"></div>
+        </div>
+      </div>
+
+      <div class="hud-top-right">
+        <div class="score-container">
+          <div class="score-label">MASS DESTROYED</div>
+          <div id="score-display">0</div>
+        </div>
+      </div>
+
+      <div class="hud-bottom-center">
+        <div id="energy-display">REACTOR: 100%</div>
+      </div>
+      
+      <div id="crosshair"></div>
+    </div>
+
+    <!-- Game Over -->
+    <div id="game-over" class="hidden">
+      <h2 class="danger-text">CRITICAL FAILURE</h2>
+      <div class="final-score">TOTAL MASS: <span id="final-score-val">0</span></div>
+      <button id="restart-btn" class="cyber-btn small">
+        <span class="btn-text">REBOOT SYSTEM</span>
+      </button>
     </div>
   </div>
 
-  <!-- Game Canvas -->
   <canvas id="gameCanvas"></canvas>
-
-  <!-- Audio (background music and effects) -->
-  <audio id="bgMusic" loop>
-    <source src="data:audio/wav;base64,..." type="audio/wav">
-  </audio>
-
   <script type="module" src="script.js"></script>
 </body>
 </html>
