@@ -7,6 +7,7 @@
   --primary-color: #00ff88;  /* Snake Head */
   --accent-color: #00ffff;   /* Snake Body */
   --food-color: #ff0055;
+  --poison-color: #8800ff;
   --text-color: #ffffff;
   --glow-shadow: 0 0 10px var(--primary-color);
   --font-main: 'Rajdhani', sans-serif;
@@ -21,6 +22,7 @@
   --primary-color: #0f380f;
   --accent-color: #306230;
   --food-color: #0f380f;
+  --poison-color: #555555;
   --text-color: #0f380f;
   --glow-shadow: none;
   --scanline-opacity: 0.05;
@@ -33,6 +35,7 @@
   --primary-color: #ffffff;
   --accent-color: #aaaaaa;
   --food-color: #ffcc00;
+  --poison-color: #ff0000;
   --text-color: #ffffff;
   --glow-shadow: none;
   --scanline-opacity: 0;
@@ -45,10 +48,64 @@
   --primary-color: #ccff00;
   --accent-color: #33ff00;
   --food-color: #ff3300;
+  --poison-color: #9933ff;
   --text-color: #ccff00;
   --glow-shadow: 0 0 15px #33ff00;
   --scanline-opacity: 0.2;
 }
+
+/* Theme: MATRIX (Digital Green) */
+[data-theme="MATRIX"] {
+  --bg-color: #000000;
+  --grid-color: rgba(0, 255, 0, 0.05);
+  --primary-color: #00ff00;
+  --accent-color: #008800;
+  --food-color: #ffffff;
+  --poison-color: #ff0000;
+  --text-color: #00ff00;
+  --glow-shadow: 0 0 5px #00ff00;
+  --scanline-opacity: 0.1;
+}
+
+/* Theme: SUNSET (Vaporwave) */
+[data-theme="SUNSET"] {
+  --bg-color: #120024;
+  --grid-color: rgba(255, 0, 255, 0.1);
+  --primary-color: #ff00de;
+  --accent-color: #00eaff;
+  --food-color: #ff9900;
+  --poison-color: #660066;
+  --text-color: #00eaff;
+  --glow-shadow: 0 0 15px #ff00de;
+  --scanline-opacity: 0.15;
+}
+
+/* Theme: CANDY (Pastel) */
+[data-theme="CANDY"] {
+  --bg-color: #fff0f5;
+  --grid-color: rgba(255, 105, 180, 0.1);
+  --primary-color: #ff69b4;
+  --accent-color: #dda0dd;
+  --food-color: #00ced1;
+  --poison-color: #555555;
+  --text-color: #ff1493;
+  --glow-shadow: none;
+  --scanline-opacity: 0;
+}
+
+/* Theme: GAMEBOY (Green LCD) */
+[data-theme="GAMEBOY"] {
+  --bg-color: #9bbc0f;
+  --grid-color: rgba(15, 56, 15, 0.05);
+  --primary-color: #0f380f;
+  --accent-color: #306230;
+  --food-color: #0f380f;
+  --poison-color: #306230;
+  --text-color: #0f380f;
+  --glow-shadow: none;
+  --scanline-opacity: 0.1; /* LCD grid effect essentially */
+}
+
 
 * {
   box-sizing: border-box;
@@ -249,20 +306,57 @@ canvas {
   background-size: 20px 20px;
 }
 
+/* MOBILE CONTROLS */
 #mobile-controls {
   margin-top: 20px;
   display: none; /* Hidden on desktop */
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+/* D-PAD STYLES */
+.d-pad {
+  display: grid;
+  grid-template-columns: repeat(3, 60px);
+  grid-template-rows: repeat(2, 60px);
+  gap: 5px;
+  opacity: 0.8;
+}
+
+.d-btn {
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid var(--primary-color);
+  color: var(--primary-color);
+  font-size: 1.5rem;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.d-btn:active {
+  background: var(--primary-color);
+  color: var(--bg-color);
+}
+
+.d-btn.up { grid-column: 2; grid-row: 1; }
+.d-btn.left { grid-column: 1; grid-row: 2; }
+.d-btn.down { grid-column: 2; grid-row: 2; }
+.d-btn.right { grid-column: 3; grid-row: 2; }
+
+.swipe-hint {
+  font-size: 0.8rem;
+  opacity: 0.5;
+  margin-top: 5px;
 }
 
 @media (hover: none) and (pointer: coarse) {
   #mobile-controls {
-    display: block;
-    width: 100%;
-    height: 150px;
-    border: 1px dashed var(--grid-color);
     display: flex;
-    justify-content: center;
-    align-items: center;
-    opacity: 0.5;
   }
 }

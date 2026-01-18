@@ -42,6 +42,16 @@
           </div>
         </div>
 
+        <!-- Difficulty Selector -->
+        <div class="setting-group">
+          <label>DIFFICULTY</label>
+          <div class="selector" id="diff-select">
+            <button class="arrow-btn" data-action="prev" data-target="diff">◄</button>
+            <span class="value" id="diff-value">MEDIUM</span>
+            <button class="arrow-btn" data-action="next" data-target="diff">►</button>
+          </div>
+        </div>
+
         <!-- Map Selector -->
         <div class="setting-group">
           <label>MAP</label>
@@ -81,9 +91,16 @@
       <div class="canvas-wrapper">
         <canvas id="game-canvas"></canvas>
       </div>
+      
       <!-- Mobile Controls -->
       <div id="mobile-controls">
-        <div class="swipe-area">SWIPE TO CONTROL</div>
+        <div class="d-pad">
+          <button class="d-btn up" data-key="ArrowUp">▲</button>
+          <button class="d-btn left" data-key="ArrowLeft">◀</button>
+          <button class="d-btn right" data-key="ArrowRight">▶</button>
+          <button class="d-btn down" data-key="ArrowDown">▼</button>
+        </div>
+        <div class="swipe-hint">SWIPE OR TAP</div>
       </div>
     </div>
 
