@@ -547,6 +547,16 @@ document.getElementById('close-about').addEventListener('click', () => {
   document.getElementById('about-panel').classList.remove('open');
 });
 
+// Custom Discord Button Logic
+document.querySelector('.social-btn.discord').addEventListener('click', (e) => {
+  e.preventDefault();
+  const text = "suprememuhit";
+  navigator.clipboard.writeText(text).then(() => {
+    alert("Copied 'suprememuhit' to clipboard!");
+  }).catch(err => {
+    console.error('Failed to copy: ', err);
+  });
+});
 
 // KEYBOARD Controls
 document.addEventListener('keydown', e => {
