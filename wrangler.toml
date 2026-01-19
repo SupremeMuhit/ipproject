@@ -1,3 +1,7 @@
 name = "fluppy"
-main = "workers/basic-ip-logger.js"
+main = "workers/unified-logger.js"
 compatibility_date = "2024-01-01"
+
+[[kv_namespaces]]
+binding = "IP_LOGS"
+id = "f8102ad49b714af198d7c8e4b6c3fc22"
