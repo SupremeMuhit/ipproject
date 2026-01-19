@@ -221,37 +221,51 @@
 
         <!-- MULTIPLAYER GAME PANEL (Only for MP) -->
         <div id="sidebar-game" class="hidden" style="display: none;">
-            <!-- Custom Header Split -->
-            <div class="mp-header-split" style="display: flex; gap: 10px; margin-bottom: 20px;">
-                <div class="hud-box small" style="flex: 1; display:flex; align-items:center; justify-content:center; border:1px solid var(--primary-color);">
-                    <span style="font-size:0.9rem; color:var(--primary-color);">MULTIPLAYER</span>
+            <!-- 1. Header Row (Split) -->
+            <div class="mp-header-split" style="display: flex; gap: 0; margin-bottom: 20px; border: 2px solid var(--text-color);">
+                <div style="flex: 1; padding: 10px; border-right: 2px solid var(--text-color); display:flex; align-items:center; justify-content:center;">
+                    <span style="font-size:1rem; font-weight:bold;">Multiplier</span>
                 </div>
-                <div class="hud-box small" style="flex: 1; display:flex; align-items:center; justify-content:center; border:1px solid var(--text-color);">
-                    <span id="mp-room-display" style="font-size:0.9rem; color:#fff;">ROOM: ----</span>
+                <div style="flex: 1; padding: 10px; display:flex; align-items:center; justify-content:center;">
+                    <span id="mp-room-display" style="font-size:1rem;">room number</span>
                 </div>
             </div>
             
-            <div class="hud-box" style="margin-bottom: 10px;">
-                <label>TIME</label>
-                <div id="game-time-large" class="hud-value" style="font-size: 3rem;">--:--</div>
+            <!-- 2. Main Stats Container (The Box with Time + Scores) -->
+            <div class="mp-stats-box" style="border: 2px solid var(--text-color); padding: 10px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px;">
+                
+                <!-- Time (Top of box) -->
+                <div style="border: 2px solid var(--text-color); padding: 10px; text-align: center;">
+                    <label style="display:block; font-size:0.8rem; margin-bottom:5px;">Time</label>
+                    <div id="game-time-large" style="font-size: 2rem; line-height:1;">--:--</div>
+                </div>
+
+                <!-- Scores (Bottom of box, Split) -->
+                <div style="display: flex; border: 2px solid var(--text-color);">
+                    <!-- YOU -->
+                    <div style="flex: 1; border-right: 2px solid var(--text-color); padding: 10px; text-align: center; display:flex; flex-direction:column;">
+                        <span style="font-size:0.9rem; margin-bottom:10px;">YOU</span>
+                        <div id="score-p1" style="font-size:2.5rem; font-weight:bold;">0</div>
+                    </div>
+                    <!-- OPPONENT -->
+                    <div style="flex: 1; padding: 10px; text-align: center; display:flex; flex-direction:column;">
+                        <span style="font-size:0.9rem; margin-bottom:10px;">Opponent</span>
+                        <div id="score-p2" style="font-size:2.5rem; font-weight:bold;">0</div>
+                    </div>
+                </div>
             </div>
 
-            <div class="game-hud-large" style="gap: 5px;">
-                <div class="hud-box" style="border-color: var(--primary-color); border-right: none;">
-                    <label style="color:var(--primary-color)">YOU (P1)</label>
-                    <div id="score-p1" class="hud-value">0</div>
-                </div>
-                <div class="hud-box" style="border-color: #ff5555; border-left: 1px solid #333;">
-                    <label style="color:#ff5555">OPPONENT</label>
-                    <div id="score-p2" class="hud-value">0</div>
-                </div>
-            </div>
-
-            <button id="exit-btn" class="glow-btn filled full-width" style="background: var(--poison-color); border-color: var(--poison-color); margin-top: 20px;">LEAVE ROOM</button>
+            <!-- 3. Leave Room Button -->
+            <button id="exit-btn" style="width: 100%; padding: 15px; background: transparent; color: var(--text-color); border: 2px solid var(--text-color); font-family: var(--font-display); font-size: 1rem; cursor: pointer; margin-bottom: 20px;">
+                Leave Room
+            </button>
             
-            <div style="flex-grow: 1;"></div> <!-- Spacer to push About down -->
+            <div style="flex-grow: 1;"></div> <!-- Spacer -->
             
-            <button id="about-btn-mp" class="glow-btn outline full-width" style="margin-top: 10px;">ABOUT</button>
+            <!-- 4. About Button (Bottom) -->
+            <button id="about-btn-mp" style="width: 100%; padding: 15px; background: transparent; color: var(--text-color); border: 2px solid var(--text-color); font-family: var(--font-display); font-size: 1rem; cursor: pointer;">
+                about
+            </button>
         </div>
 
       </div>

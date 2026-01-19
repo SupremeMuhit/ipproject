@@ -208,7 +208,7 @@ function startGame() {
   
   if (mp.isActive) {
     toggleSidebar('GAME');
-    document.getElementById('mp-room-display').textContent = `ROOM: ${mp.roomCode}`;
+    document.getElementById('mp-room-display').textContent = mp.roomCode;
   } else {
     toggleSidebar('MENU'); // Ensure standard sidebar for Single Player
   }
