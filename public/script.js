@@ -557,6 +557,8 @@ function initMultiplayer() {
   const menuDiv = document.getElementById('mp-menu');
   const statusText = document.getElementById('mp-status-text');
   
+  const cancelWaitBtn = document.getElementById('cancel-wait-btn');
+  
   mpBtn.addEventListener('click', () => {
     mpPopup.classList.remove('hidden');
     mpPopup.style.display = 'block';
@@ -565,8 +567,20 @@ function initMultiplayer() {
   });
   
   cancelBtn.addEventListener('click', () => {
-     mpPopup.classList.add('hidden'); // Use class
+     mpPopup.classList.add('hidden'); 
      mpPopup.style.display = 'none';
+  });
+
+  cancelWaitBtn.addEventListener('click', () => {
+    // Cancel the process
+    // Ideally we should remove our player entry if we were mid-connection?
+    // For now just reset UI
+    mpPopup.classList.add('hidden');
+    mpPopup.style.display = 'none';
+    mp.isActive = false;
+    mp.connected = false;
+    // Reload page to ensure clean ID disconnect? Or just handle simple reset
+    window.location.reload(); 
   });
   
   joinBtn.addEventListener('click', () => {
@@ -595,57 +609,64 @@ async function startMpConnection(code) {
   mp.roomCode = code;
   statusText.textContent = "CHECKING ROOM...";
   
-  const roomRef = ref(db, `rooms/${code}/players`);
-  const snapshot = await get(roomRef);
-  const players = snapshot.val() || {};
-  
-  if (!players.p1) {
-    mp.playerId = 'p1';
-    statusText.textContent = "HOSTING ROOM... WAITING FOR P2";
-  } else if (!players.p2) {
-    mp.playerId = 'p2';
-    statusText.textContent = "CONNECTING AS P2...";
-  } else {
-    alert("Room Full!");
-    menuDiv.classList.remove('hidden');
-    statusDiv.classList.add('hidden');
-    return;
-  }
-  
-  // Register existence
-  const myRef = ref(db, `rooms/${code}/players/${mp.playerId}`);
-  onDisconnect(myRef).remove(); // Auto-cleanup
-  await set(myRef, { active: true, snake: [] });
-  
-  mp.isActive = true;
-  mp.connected = true;
-  
-  // Listen for OTHER player
-  const otherId = mp.playerId === 'p1' ? 'p2' : 'p1';
-  const otherRef = ref(db, `rooms/${code}/players/${otherId}`);
-  
-  onValue(otherRef, (snap) => {
-    const data = snap.val();
-    if (data && data.active) {
-       // Player connected!
-       mp.remoteSnake = data.snake || [];
-       
-       // If both connected, START?
-       if (document.getElementById('mp-popup').style.display !== 'none') {
-         // Auto start if we were waiting
-         if (mp.playerId === 'p1' || mp.playerId === 'p2') { 
-            // Simple check: if I have data from other, we are good?
-            // Really we should wait for both presence?
-            // Simpler: Just start game if not started
+  try {
+    const roomRef = ref(db, `rooms/${code}/players`);
+    const snapshot = await get(roomRef);
+    const players = snapshot.val() || {};
+    
+    if (!players.p1) {
+      mp.playerId = 'p1';
+      statusText.textContent = "ROOM NOT FOUND. CREATING...";
+      setTimeout(() => {
+         statusText.textContent = "WAITING FOR PLAYER 2...";
+      }, 1500);
+    } else if (!players.p2) {
+      mp.playerId = 'p2';
+      statusText.textContent = "ROOM FOUND! CONNECTING...";
+    } else {
+      alert("Room Full!");
+      menuDiv.classList.remove('hidden');
+      statusDiv.classList.add('hidden');
+      return;
+    }
+    
+    // Register existence
+    const myRef = ref(db, `rooms/${code}/players/${mp.playerId}`);
+    onDisconnect(myRef).remove(); // Auto-cleanup
+    await set(myRef, { active: true, snake: [] });
+    
+    mp.isActive = true;
+    mp.connected = true;
+    
+    // Listen for OTHER player
+    const otherId = mp.playerId === 'p1' ? 'p2' : 'p1';
+    const otherRef = ref(db, `rooms/${code}/players/${otherId}`);
+    
+    onValue(otherRef, (snap) => {
+      const data = snap.val();
+      if (data && data.active) {
+         // Player connected!
+         mp.remoteSnake = data.snake || [];
+         
+         // Only start if we are strictly in the "waiting" popup state
+         if (document.getElementById('mp-popup').style.display !== 'none') {
             if (!game.active) {
                startGame();
             }
          }
-       }
-    } else {
-       mp.remoteSnake = [];
-    }
-  });
+      } else {
+         mp.remoteSnake = [];
+      }
+    });
+
+  } catch(e) {
+    console.error(e);
+    statusText.textContent = "CONNECTION FAILED";
+    setTimeout(() => {
+      menuDiv.classList.remove('hidden');
+      statusDiv.classList.add('hidden');
+    }, 2000);
+  }
 
 }
 
