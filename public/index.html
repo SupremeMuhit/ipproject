@@ -53,13 +53,57 @@
 
           <!-- POPUP: MULTIPLAYER SETUP -->
           <div id="mp-popup" class="hidden" style="display: none;">
-            <h2>MULTIPLAYER</h2>
-            <div id="mp-menu">
+            <h2>MULTIPLAYER <span style="font-size:0.8rem; color:var(--accent-color)">BETA</span></h2>
+            
+            <!-- VIEW 1: SELECTION -->
+            <div id="mp-view-select">
+               <button id="btn-select-create" class="glow-btn filled full-width" style="margin-bottom:10px;">CREATE ROOM</button>
+               <button id="btn-select-join" class="glow-btn outline full-width">JOIN ROOM</button>
+               <button id="btn-mp-close" class="glow-btn outline small full-width" style="margin-top:20px; border:none;">CANCEL</button>
+            </div>
+
+            <!-- VIEW 2: CREATE ROOM -->
+            <div id="mp-view-create" class="hidden">
+               <div class="setting-group">
+                 <label>GAME MODE</label>
+                 <select id="mp-create-mode" style="width:100%; background:#222; color:#fff; border:1px solid var(--primary-color); padding:5px;">
+                   <option value="PVP">PVP (Head Collision Kills)</option>
+                   <option value="FRIENDLY">FRIENDLY (No Collision)</option>
+                 </select>
+               </div>
+               <div class="setting-group">
+                 <label>MAP TYPE</label>
+                 <select id="mp-create-map" style="width:100%; background:#222; color:#fff; border:1px solid var(--primary-color); padding:5px;">
+                   <option value="BOX">WALLED</option>
+                   <option value="INFINITE">INFINITE</option>
+                 </select>
+               </div>
+               <div class="setting-group">
+                 <label>DIFFICULTY</label>
+                 <select id="mp-create-diff" style="width:100%; background:#222; color:#fff; border:1px solid var(--primary-color); padding:5px;">
+                   <option value="1">MEDIUM</option>
+                   <option value="2">HARD</option>
+                   <option value="3">EXTREME</option>
+                   <option value="0">EASY</option>
+                 </select>
+               </div>
+               <div class="setting-group">
+                 <label>ROOM CODE (5-Digits)</label>
+                 <input type="number" id="mp-create-code" placeholder="12345" max="99999" style="width:100%; background:#222; color:#fff; border:1px solid var(--primary-color); text-align:center; padding:8px;">
+               </div>
+               <button id="btn-do-create" class="glow-btn filled full-width" style="margin-top:15px;">CREATE & HOST</button>
+               <button class="btn-back glow-btn outline small full-width" style="margin-top:10px;">BACK</button>
+            </div>
+
+            <!-- VIEW 3: JOIN ROOM -->
+            <div id="mp-view-join" class="hidden">
               <p>Enter 5-digit Room Code</p>
               <input type="number" id="room-code-input" placeholder="12345" max="99999" style="padding: 10px; width: 100%; margin: 10px 0; background: #222; color: #fff; border: 1px solid var(--primary-color); text-align: center; font-family: var(--font-display);">
               <button id="join-room-btn" class="glow-btn filled full-width">JOIN ROOM</button>
-              <button id="cancel-mp-btn" class="glow-btn outline full-width" style="margin-top: 10px;">CANCEL</button>
+              <button class="btn-back glow-btn outline small full-width" style="margin-top:10px;">BACK</button>
             </div>
+
+            <!-- VIEW 4: STATUS -->
             <div id="mp-status" class="hidden">
               <p id="mp-status-text">CONNECTING...</p>
               <div class="loader" style="margin: 20px auto;"></div>
@@ -88,76 +132,107 @@
       </div>
 
       <div class="sidebar-content">
-        <div class="settings-grid">
-          
-          <!-- Theme -->
-          <div class="setting-group">
-            <label>THEME</label>
-            <div class="selector">
-              <button class="arrow-btn" data-action="prev" data-target="theme">◄</button>
-              <span class="value" id="theme-value">NEON</span>
-              <button class="arrow-btn" data-action="next" data-target="theme">►</button>
-            </div>
-          </div>
+        <!-- MENU PANEL -->
+        <div id="sidebar-menu">
+            <div class="settings-grid">
+              
+              <!-- Theme -->
+              <div class="setting-group">
+                <label>THEME</label>
+                <div class="selector">
+                  <button class="arrow-btn" data-action="prev" data-target="theme">◄</button>
+                  <span class="value" id="theme-value">NEON</span>
+                  <button class="arrow-btn" data-action="next" data-target="theme">►</button>
+                </div>
+              </div>
 
-          <!-- Mode -->
-          <div class="setting-group">
-            <label>MODE</label>
-            <div class="selector">
-              <button class="arrow-btn" data-action="prev" data-target="mode">◄</button>
-              <span class="value" id="mode-value">CLASSIC</span>
-              <button class="arrow-btn" data-action="next" data-target="mode">►</button>
-            </div>
-          </div>
+              <!-- Mode -->
+              <div class="setting-group">
+                <label>MODE</label>
+                <div class="selector">
+                  <button class="arrow-btn" data-action="prev" data-target="mode">◄</button>
+                  <span class="value" id="mode-value">CLASSIC</span>
+                  <button class="arrow-btn" data-action="next" data-target="mode">►</button>
+                </div>
+              </div>
 
-          <!-- Difficulty -->
-          <div class="setting-group">
-            <label>DIFFICULTY</label>
-            <div class="selector">
-              <button class="arrow-btn" data-action="prev" data-target="diff">◄</button>
-              <span class="value" id="diff-value">MEDIUM</span>
-              <button class="arrow-btn" data-action="next" data-target="diff">►</button>
-            </div>
-          </div>
+              <!-- Map Type -->
+              <div class="setting-group">
+                <label>MAP TYPE</label>
+                <div class="selector">
+                  <button class="arrow-btn" data-action="prev" data-target="map">◄</button>
+                  <span class="value" id="map-value">BOX</span>
+                  <button class="arrow-btn" data-action="next" data-target="map">►</button>
+                </div>
+              </div>
 
-          <!-- Map Type -->
-          <div class="setting-group">
-            <label>MAP TYPE</label>
-            <div class="selector">
-              <button class="arrow-btn" data-action="prev" data-target="map">◄</button>
-              <span class="value" id="map-value">BOX</span>
-              <button class="arrow-btn" data-action="next" data-target="map">►</button>
-            </div>
-          </div>
+              <!-- Time Limit (New) -->
+              <div class="setting-group">
+                <label>TIME</label>
+                <div class="selector">
+                  <button class="arrow-btn" data-action="prev" data-target="time">◄</button>
+                  <span class="value" id="time-value">∞</span>
+                  <button class="arrow-btn" data-action="next" data-target="time">►</button>
+                </div>
+              </div>
 
-          <!-- Map Size (New) -->
-          <div class="setting-group">
-            <label>GRID SIZE</label>
-            <div class="selector">
-              <button class="arrow-btn" data-action="prev" data-target="size">◄</button>
-              <span class="value" id="size-value">25x25</span>
-              <button class="arrow-btn" data-action="next" data-target="size">►</button>
-            </div>
-          </div>
+              <!-- Difficulty -->
+              <div class="setting-group">
+                <label>DIFFICULTY</label>
+                <div class="selector">
+                  <button class="arrow-btn" data-action="prev" data-target="diff">◄</button>
+                  <span class="value" id="diff-value">MEDIUM</span>
+                  <button class="arrow-btn" data-action="next" data-target="diff">►</button>
+                </div>
+              </div>
 
+              <!-- Map Size -->
+              <div class="setting-group">
+                <label>GRID SIZE</label>
+                <div class="selector">
+                  <button class="arrow-btn" data-action="prev" data-target="size">◄</button>
+                  <span class="value" id="size-value">25x25</span>
+                  <button class="arrow-btn" data-action="next" data-target="size">►</button>
+                </div>
+              </div>
+            </div>
+
+            <button id="start-btn" class="glow-btn full-width">START GAME</button>
+            <button id="mp-btn" class="glow-btn outline full-width" style="margin-top: 10px; position: relative;">
+              MULTIPLAYER 
+              <span style="font-size: 0.5rem; vertical-align: super; color: var(--accent-color); position: absolute; top: 5px; right: 10px;">BETA</span>
+            </button>
+            
+            <button id="about-btn" class="glow-btn outline full-width" style="margin-top: 10px;">ABOUT & CREDITS</button>
         </div>
 
-        <button id="start-btn" class="glow-btn full-width">START GAME</button>
-        <button id="mp-btn" class="glow-btn outline full-width" style="margin-top: 10px;">MULTIPLAYER</button>
-        
-        <!-- LEADERBOARD (Top 10) -->
-        <div class="leaderboard-panel">
-          <h3>LEADERBOARD</h3>
-          <ul id="leaderboard-list">
-            <!-- JS Populates this -->
-             <li><span class="rank">1.</span> <span class="score">-</span></li>
-          </ul>
+        <!-- IN-GAME PANEL (Hidden by default) -->
+        <div id="sidebar-game" class="hidden" style="display: none;">
+            <div class="game-hud-large">
+                <div class="hud-box">
+                    <label>SCORE</label>
+                    <div id="game-score-large" class="hud-value">0</div>
+                </div>
+                <div class="hud-box">
+                    <label>TIME</label>
+                    <div id="game-time-large" class="hud-value">--:--</div>
+                </div>
+            </div>
+            
+            <div class="leaderboard-panel expanded">
+              <h3>LEADERBOARD</h3>
+              <ul id="leaderboard-list">
+                 <li><span class="rank">1.</span> <span class="score">-</span></li>
+              </ul>
+            </div>
+
+            <div class="controls-hint-sidebar">
+                <p>EXIT: Press Button Below</p>
+            </div>
+
+            <button id="exit-btn" class="glow-btn filled full-width" style="background: var(--poison-color); border-color: var(--poison-color); margin-top: auto;">EXIT GAME</button>
         </div>
 
-
-        
-        <!-- ABOUT BUTTON -->
-        <button id="about-btn" class="glow-btn outline full-width">ABOUT & CREDITS</button>
       </div>
 
     </div>

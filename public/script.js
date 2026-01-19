@@ -54,10 +54,19 @@ const SIZES = [
   { w: 40, h: 40, label: '40x40' }
 ];
 
+const TIMES = [
+  { val: Infinity, label: '∞' },
+  { val: 60, label: '1 MIN' },
+  { val: 120, label: '2 MIN' },
+  { val: 180, label: '3 MIN' },
+  { val: 300, label: '5 MIN' }
+];
+
 // STATE
 let game = {
   active: false,
   timer: null,
+  clockTimer: null,
   score: 0,
   snake: [],
   dir: {x:1, y:0}, // Direction
@@ -65,10 +74,12 @@ let game = {
   food: null,
   poison: null,    // For POISON mode
   obstacles: [],
+  timeRemaining: 0, 
   settings: {
     theme: 0,
     mode: 0,
     map: 0,
+    time: 0, // Default Infinity
     diff: 1, // Default Medium
     size: 2  // Default 20x20 (Index 2 for array)
   }
@@ -158,11 +169,44 @@ class Grid {
 // GAME LOOP
 // ==========================================
 
+function toggleSidebar(mode) {
+  const menu = document.getElementById('sidebar-menu');
+  const hud = document.getElementById('sidebar-game');
+  if (mode === 'GAME') {
+    menu.style.display = 'none';
+    hud.style.display = 'flex';
+    hud.classList.remove('hidden');
+  } else {
+    menu.style.display = 'block';
+    hud.style.display = 'none';
+    hud.classList.add('hidden');
+  }
+}
+
+function updateClock() {
+  if (!game.active || game.timeRemaining === Infinity) return;
+  
+  const minutes = Math.floor(game.timeRemaining / 60);
+  const seconds = game.timeRemaining % 60;
+  const str = `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+  
+  document.getElementById('game-time-large').textContent = str;
+  // Also existing tiny mode text if needed, but we hide sidebar settings now
+  
+  if (game.timeRemaining <= 0) {
+    gameOver();
+    return;
+  }
+  
+  game.timeRemaining--;
+}
+
 function startGame() {
   document.getElementById('preview-overlay').style.opacity = '0';
   document.getElementById('game-over').classList.add('hidden');
   document.getElementById('mp-popup').classList.add('hidden'); // Ensure mp popup is gone
   
+  toggleSidebar('GAME');
   Grid.init();
   
   // Logic Setup
@@ -190,6 +234,19 @@ function startGame() {
   game.active = true;
   game.poison = null;
   game.food = spawnFood();
+  
+  // Timer Setup
+  const timeSetting = TIMES[game.settings.time];
+  game.timeRemaining = timeSetting.val;
+  // Initial clock Render
+  if(game.timeRemaining === Infinity) document.getElementById('game-time-large').textContent = "--:--";
+  else updateClock(); // Render start immediately
+  
+  if (game.clockTimer) clearInterval(game.clockTimer);
+  if (game.timeRemaining !== Infinity) {
+      game.clockTimer = setInterval(updateClock, 1000);
+  }
+
   if (MODES[game.settings.mode] === 'POISON') game.poison = spawnFood();
   if (MODES[game.settings.mode] === 'SURVIVAL') game.obstacles = []; // Clear obstacles for new survival run
   
@@ -452,6 +509,7 @@ function addRandomObstacle() {
 
 function updateScore(s) {
   scoreEl.textContent = s;
+  document.getElementById('game-score-large').textContent = s;
 }
 
 function showFloatingText(text, pos) {
@@ -484,6 +542,7 @@ function showFloatingText(text, pos) {
 function gameOver() {
   game.active = false;
   clearInterval(game.timer);
+  if(game.clockTimer) clearInterval(game.clockTimer);
   
   const popup = document.getElementById('game-over');
   const newHighScoreEl = document.getElementById('new-high-score');
@@ -547,148 +606,153 @@ function renderLeaderboard(entries) {
 // MP LOGIC
 // ==========================================
 
+function switchMpView(viewId) {
+  ['mp-view-select', 'mp-view-create', 'mp-view-join', 'mp-status'].forEach(id => {
+    document.getElementById(id).classList.add('hidden');
+  });
+  document.getElementById(viewId).classList.remove('hidden');
+}
+
 function initMultiplayer() {
   const mpBtn = document.getElementById('mp-btn');
   const mpPopup = document.getElementById('mp-popup');
-  const joinBtn = document.getElementById('join-room-btn');
-  const cancelBtn = document.getElementById('cancel-mp-btn');
-  const roomInput = document.getElementById('room-code-input');
-  const statusDiv = document.getElementById('mp-status');
-  const menuDiv = document.getElementById('mp-menu');
-  const statusText = document.getElementById('mp-status-text');
   
-  const cancelWaitBtn = document.getElementById('cancel-wait-btn');
+  // Main Menu Buttons
+  document.getElementById('btn-select-create').addEventListener('click', () => switchMpView('mp-view-create'));
+  document.getElementById('btn-select-join').addEventListener('click', () => switchMpView('mp-view-join'));
+  document.getElementById('btn-mp-close').addEventListener('click', () => {
+    mpPopup.classList.add('hidden');
+    mpPopup.style.display = 'none';
+  });
+
+  // Back Buttons
+  document.querySelectorAll('.btn-back').forEach(btn => {
+    btn.addEventListener('click', () => switchMpView('mp-view-select'));
+  });
+
+  // CREATE Action
+  document.getElementById('btn-do-create').addEventListener('click', () => {
+    const code = document.getElementById('mp-create-code').value;
+    if(code.length !== 5) return alert("Enter 5-digit code");
+    
+    const settings = {
+        mode: document.getElementById('mp-create-mode').value,
+        map: document.getElementById('mp-create-map').value,
+        diff: parseInt(document.getElementById('mp-create-diff').value)
+    };
+    
+    startMpAction('CREATE', code, settings);
+  });
+
+  // JOIN Action
+  document.getElementById('join-room-btn').addEventListener('click', () => {
+    const code = document.getElementById('room-code-input').value;
+    if(code.length !== 5) return alert("Enter 5-digit code");
+    startMpAction('JOIN', code);
+  });
+
+  // Cancel Wait
+  document.getElementById('cancel-wait-btn').addEventListener('click', () => {
+     mpPopup.style.display = 'none'; 
+     mpPopup.classList.add('hidden');
+     window.location.reload(); 
+  });
   
+  // Open Popup
   mpBtn.addEventListener('click', () => {
     mpPopup.classList.remove('hidden');
     mpPopup.style.display = 'block';
-    menuDiv.classList.remove('hidden');
-    statusDiv.classList.add('hidden');
-  });
-  
-  cancelBtn.addEventListener('click', () => {
-     mpPopup.classList.add('hidden'); 
-     mpPopup.style.display = 'none';
-  });
-
-  cancelWaitBtn.addEventListener('click', () => {
-    // Cancel the process
-    // Ideally we should remove our player entry if we were mid-connection?
-    // For now just reset UI
-    mpPopup.classList.add('hidden');
-    mpPopup.style.display = 'none';
-    mp.isActive = false;
-    mp.connected = false;
-    // Reload page to ensure clean ID disconnect? Or just handle simple reset
-    window.location.reload(); 
-  });
-  
-  joinBtn.addEventListener('click', () => {
-    const code = roomInput.value;
-    if(code.length !== 5) {
-      alert("Please enter a 5-digit code!");
-      return;
-    }
-    startMpConnection(code);
+    switchMpView('mp-view-select');
   });
 }
 
-async function startMpConnection(code) {
-  if (!db) {
-    alert("Database not ready! Check config.");
-    return;
-  }
-  
-  const menuDiv = document.getElementById('mp-menu');
-  const statusDiv = document.getElementById('mp-status');
-  const statusText = document.getElementById('mp-status-text');
-  
-  menuDiv.classList.add('hidden');
-  statusDiv.classList.remove('hidden');
+async function startMpAction(action, code, settings = null) {
+  if (!db) return alert("DB Error");
+
+  switchMpView('mp-status');
+  document.getElementById('mp-status-text').textContent = action === 'CREATE' ? "CREATING ROOM..." : "CONNECTING...";
   
   mp.roomCode = code;
-  mp.isActive = true; // Mark active so we can cancel it
-  statusText.textContent = "CHECKING ROOM...";
-  
-  try {
-    const roomRef = ref(db, `rooms/${code}/players`);
-    
-    // Add 5s Timeout to prevent hanging
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error("TIMEOUT")), 5000)
-    );
-    
-    const snapshot = await Promise.race([
-      get(roomRef),
-      timeoutPromise
-    ]);
+  mp.isActive = true;
 
-    const players = snapshot.val() || {};
-    
-    if (!players.p1) {
-      mp.playerId = 'p1';
-      statusText.textContent = "ROOM NOT FOUND. CREATING...";
-      setTimeout(() => {
-         // Check if cancelled during wait
-         if(mp.isActive) statusText.textContent = "WAITING FOR PLAYER 2...";
-      }, 1500);
-    } else if (!players.p2) {
-      mp.playerId = 'p2';
-      statusText.textContent = "ROOM FOUND! CONNECTING...";
-    } else {
-      alert("Room Full!");
-      menuDiv.classList.remove('hidden');
-      statusDiv.classList.add('hidden');
-      return;
-    }
-    
-    // Register existence
-    const myRef = ref(db, `rooms/${code}/players/${mp.playerId}`);
-    onDisconnect(myRef).remove(); // Auto-cleanup
-    await set(myRef, { active: true, snake: [] });
-    
-    mp.isActive = true;
-    mp.connected = true;
-    
-    // Listen for OTHER player
-    const otherId = mp.playerId === 'p1' ? 'p2' : 'p1';
-    const otherRef = ref(db, `rooms/${code}/players/${otherId}`);
-    
-    onValue(otherRef, (snap) => {
-      const data = snap.val();
-      if (data && data.active) {
-         // Player connected!
-         mp.remoteSnake = data.snake || [];
-         
-         // Only start if we are strictly in the "waiting" popup state
-         if (document.getElementById('mp-popup').style.display !== 'none') {
-            if (!game.active) {
-               startGame();
-            }
+  try {
+     const roomBase = `rooms/${code}`;
+     
+     if (action === 'CREATE') {
+         // Check if exists
+         const snap = await get(ref(db, roomBase + '/players/p1'));
+         if (snap.exists()) {
+             alert("Room already exists! Try another code.");
+             return switchMpView('mp-view-create');
          }
-      } else {
-         mp.remoteSnake = [];
-      }
-    });
+         
+         // Set Settings
+         await set(ref(db, roomBase + '/settings'), settings);
+         
+         // Join as P1
+         mp.playerId = 'p1';
+         await set(ref(db, roomBase + '/players/p1'), { active: true, snake: [] });
+         onDisconnect(ref(db, roomBase + '/players/p1')).remove();
+         
+         // Apply Local Settings
+         game.settings.map = MAPS.indexOf(settings.map);
+         game.settings.diff = settings.diff;
+         // MP Mode override? For now we just use the synced settings logic in update
+         
+         document.getElementById('mp-status-text').textContent = "WAITING FOR P2...";
+
+     } else {
+         // JOIN
+         const snap = await get(ref(db, roomBase + '/settings'));
+         if (!snap.exists()) {
+             alert("Room does not exist!");
+             return switchMpView('mp-view-join');
+         }
+         
+         const hostSettings = snap.val();
+         
+         // Check P2 slot
+         const p2Snap = await get(ref(db, roomBase + '/players/p2'));
+         if (p2Snap.exists()) {
+             alert("Room full!");
+             return switchMpView('mp-view-join');
+         }
+         
+         mp.playerId = 'p2';
+         await set(ref(db, roomBase + '/players/p2'), { active: true, snake: [] });
+         onDisconnect(ref(db, roomBase + '/players/p2')).remove();
+         
+         // Sync Local Settings
+         game.settings.map = MAPS.indexOf(hostSettings.map);
+         game.settings.diff = hostSettings.diff;
+         
+         // Store MP specific settings for logic
+         mp.settings = hostSettings; 
+         
+         document.getElementById('mp-status-text').textContent = "CONNECTED! WAITING FOR HOST...";
+     }
+     
+     mp.connected = true;
+     
+     // LISTEN FOR OPPONENT
+     const otherId = mp.playerId === 'p1' ? 'p2' : 'p1';
+     onValue(ref(db, `rooms/${code}/players/${otherId}`), (snap) => {
+         const data = snap.val();
+         if (data && data.active) {
+             mp.remoteSnake = data.snake || [];
+             if (!game.active && document.getElementById('mp-popup').style.display !== 'none') {
+                 startGame();
+             }
+         } else {
+             mp.remoteSnake = [];
+         }
+     });
 
   } catch(e) {
-    console.error("MP Error:", e);
-    
-    let msg = "CONNECTION FAILED";
-    if (e.message === "TIMEOUT") msg = "CONNECTION TIMED OUT";
-    if (e.code === "PERMISSION_DENIED") msg = "DB RULES BLOCKED ACCESS";
-    
-    statusText.textContent = msg;
-    
-    setTimeout(() => {
-      // Return to menu
-      if (document.getElementById('mp-popup').style.display !== 'none') {
-         menuDiv.classList.remove('hidden');
-         statusDiv.classList.add('hidden');
-      }
-    }, 2000);
+      console.error(e);
+      alert("Connection Failed: " + (e.code || e.message));
+      switchMpView('mp-view-select');
   }
-
 }
 
 initMultiplayer();
@@ -704,6 +768,7 @@ function updateSettingsUI() {
   document.getElementById('map-value').textContent = MAPS[game.settings.map];
   document.getElementById('diff-value').textContent = DIFFICULTIES[game.settings.diff];
   document.getElementById('size-value').textContent = SIZES[game.settings.size].label;
+  document.getElementById('time-value').textContent = TIMES[game.settings.time].label;
   
   document.body.setAttribute('data-theme', THEMES[game.settings.theme]);
   
@@ -726,7 +791,8 @@ function handleSetting(action, target) {
     'mode': MODES,
     'map': MAPS,
     'diff': DIFFICULTIES,
-    'size': SIZES
+    'size': SIZES,
+    'time': TIMES
   };
   const list = arrays[target];
   let current = game.settings[target];
@@ -747,6 +813,23 @@ document.querySelectorAll('.arrow-btn').forEach(btn => {
     handleSetting(e.target.dataset.action, e.target.dataset.target);
   });
 });
+
+function exitGame() {
+  game.active = false;
+  mp.isActive = false; // Disable MP if valid
+  mp.connected = false;
+  if (game.timer) clearInterval(game.timer);
+  if (game.clockTimer) clearInterval(game.clockTimer);
+  
+  // Return to menu
+  toggleSidebar('MENU');
+  document.getElementById('game-over').classList.add('hidden');
+  document.getElementById('game-over').style.display = 'none'; // Ensure hidden
+  
+  drawPreview(); // Show start
+}
+
+document.getElementById('exit-btn').addEventListener('click', exitGame);
 
 // Mobile Bottom Bar Logic
 document.getElementById('mob-start-btn').addEventListener('click', startGame);
