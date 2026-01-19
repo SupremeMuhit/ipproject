@@ -221,34 +221,37 @@
 
         <!-- MULTIPLAYER GAME PANEL (Only for MP) -->
         <div id="sidebar-game" class="hidden" style="display: none;">
-            <h3 style="text-align:center; color:var(--accent-color); margin-bottom:20px;">MULTIPLAYER</h3>
+            <!-- Custom Header Split -->
+            <div class="mp-header-split" style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <div class="hud-box small" style="flex: 1; display:flex; align-items:center; justify-content:center; border:1px solid var(--primary-color);">
+                    <span style="font-size:0.9rem; color:var(--primary-color);">MULTIPLAYER</span>
+                </div>
+                <div class="hud-box small" style="flex: 1; display:flex; align-items:center; justify-content:center; border:1px solid var(--text-color);">
+                    <span id="mp-room-display" style="font-size:0.9rem; color:#fff;">ROOM: ----</span>
+                </div>
+            </div>
             
-            <div class="hud-box" style="margin-bottom: 20px;">
-                <label>TIME REMAINING</label>
+            <div class="hud-box" style="margin-bottom: 10px;">
+                <label>TIME</label>
                 <div id="game-time-large" class="hud-value" style="font-size: 3rem;">--:--</div>
             </div>
 
-            <div class="game-hud-large">
-                <div class="hud-box" style="border-color: var(--primary-color);">
+            <div class="game-hud-large" style="gap: 5px;">
+                <div class="hud-box" style="border-color: var(--primary-color); border-right: none;">
                     <label style="color:var(--primary-color)">YOU (P1)</label>
                     <div id="score-p1" class="hud-value">0</div>
                 </div>
-                <div class="hud-box" style="border-color: #ff5555;">
+                <div class="hud-box" style="border-color: #ff5555; border-left: 1px solid #333;">
                     <label style="color:#ff5555">OPPONENT</label>
                     <div id="score-p2" class="hud-value">0</div>
                 </div>
             </div>
 
-            <div class="controls-hint-sidebar">
-               <p>MULTIPLAYER MATCH</p>
-            </div>
-
-            <button id="exit-btn" class="glow-btn filled full-width" style="background: var(--poison-color); border-color: var(--poison-color); margin-top: auto;">EXIT MATCH</button>
+            <button id="exit-btn" class="glow-btn filled full-width" style="background: var(--poison-color); border-color: var(--poison-color); margin-top: 20px;">LEAVE ROOM</button>
             
-            <!-- About kept here too per request? "About will stay like previous" -> assume button available or just panel exists? 
-                 Actually user said "only two things 1 exit button, 2 scoreboard" initially, then "about will stay like previouse".
-                 "Previouse" sidebar had About button. I'll add it back to MP sidebar just in case. -->
-            <button id="about-btn-mp" class="glow-btn outline full-width" style="margin-top: 10px;">ABOUT & CREDITS</button>
+            <div style="flex-grow: 1;"></div> <!-- Spacer to push About down -->
+            
+            <button id="about-btn-mp" class="glow-btn outline full-width" style="margin-top: 10px;">ABOUT</button>
         </div>
 
       </div>

@@ -206,8 +206,12 @@ function startGame() {
   document.getElementById('game-over').classList.add('hidden');
   document.getElementById('mp-popup').classList.add('hidden'); // Ensure mp popup is gone
   
-  if (mp.isActive) toggleSidebar('GAME');
-  else toggleSidebar('MENU'); // Ensure standard sidebar for Single Player
+  if (mp.isActive) {
+    toggleSidebar('GAME');
+    document.getElementById('mp-room-display').textContent = `ROOM: ${mp.roomCode}`;
+  } else {
+    toggleSidebar('MENU'); // Ensure standard sidebar for Single Player
+  }
   Grid.init();
   
   // Logic Setup
@@ -612,7 +616,7 @@ function renderLeaderboard(entries) {
   // Fill up to 10 slots
   const count = Math.max(entries.length, 5); 
   
-  for(let i=0; i<entries.length; i++) {
+  for(let i=0; i<count; i++) {
     const entry = entries[i];
     const itemScore = entry ? entry.score : '-';
     // Format: "Medium - 20x10 = 200"

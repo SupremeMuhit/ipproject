@@ -1,70 +1,48 @@
-# 🐍 FLUPPY SNAKE | IP Logging Game
+# 🐍 FLUPPY SNAKE | The Ultimate Retro Snake Experience
 
-**Fluppy Snake** is a feature-packed, retro-futuristic Snake game running on Cloudflare Pages, with a hidden IP logging backend powered by Cloudflare Workers.
+**Fluppy Snake** is a feature-packed, modern reimagining of the classic Snake game, built for speed, style, and multiplayer fun. Customize your experience with vivid themes, challenge yourself with unique game modes, or battle a friend in real-time!
 
-## 🚀 Features
+## 🌟 Game Features
 
-### 🎮 Gameplay
--   **4 Themes**: Neon, Classic (Gameboy), Minimal, Bio-Hazard, Matrix, Sunset, Candy.
--   **4 Modes**:
-    -   **Classic**: Standard Snake.
-    -   **Speed**: Fast-paced action.
-    -   **Survival**: Obstacles spawn as you eat.
-    -   **Zen**: No walls, no death (except self-collision), just chill.
-    -   **Campaign**: Speed increases as your score grows.
-    -   **Portal**: Walls wrap around telekinetically.
-    -   **Poison**: Avoid the red poison apples!
--   **4 Maps**: Box, Infinite, Maze, Obstacles.
--   **Difficulty**: Easy, Medium, Hard, Extreme.
+### � 8 Unique Themes
+Customize the look and feel of your game with vibrant themes:
+*   **NEON**: Cyberpunk glow aesthetic.
+*   **CLASSIC**: Nostalgic Nokia vibes.
+*   **MINIMAL**: Clean and distraction-free.
+*   **BIO-HAZARD**: Toxic green warning style.
+*   **MATRIX**: Digital rain code aesthetic.
+*   **SUNSET**: Warm gradient vibes.
+*   **CANDY**: Sweet and colorful.
+*   **GAMEBOY**: Authentic retro green-tinted pixel art.
 
-### 📱 Controls
--   **PC**: WASD or Arrow Keys.
--   **Mobile**: Touch Swipe Gestures + On-Screen D-Pad.
+### 🎮 7 Game Modes
+*   **CLASSIC**: The standard experience. Eat and grow.
+*   **SPEED**: Fast-paced action for adrenaline junkies.
+*   **SURVIVAL**: Obstacles spawn randomly as you eat. Watch out!
+*   **ZEN**: No walls, no death (except self-collision). Just chill and infinite growth.
+*   **CAMPAIGN**: Speed increases dynamically as your score grows.
+*   **PORTAL**: Walls wrap around telekinetically.
+*   **POISON**: Avoid the red poison apples mixed with the food!
 
-### 🕵️‍♂️ Backend (IP Logger)
-This project includes a **Cloudflare Worker** that logs visitor IP addresses.
--   **Worker URL**: `https://fluppy.suprememuhit.workers.dev` (Direct logging)
--   **Frontend URL**: `https://fluppy.pages.dev` (Silent background logging via `/ping`)
+### �️ 4 Map Types
+*   **BOX**: Standard walled arena.
+*   **INFINITE**: Wall-less map (wrap around).
+*   **MAZE**: Navigate through a predefined grid maze.
+*   **OBSTACLES**: Random blocks scattered across the map.
 
-Logs are stored in Cloudflare's internal logs (viewable via `wrangler tail` or Dashboard).
+### ⚔️ Multiplayer (BETA)
+Challenge a friend in real-time 1v1 battles!
+*   **Create & Join**: Host a room with a 5-digit code or join a friend's lobby.
+*   **PVP Mode**: Head-to-head collision kills! Cut off your opponent to win.
+*   **Friendly Mode**: No collisions with each other. Just compete for the highest score.
+*   **Live Scoreboard**: Track who is the true Snake Master.
 
-## 🛠️ Installation & Deployment
+## �️ Controls
 
-### Prerequisites
--   Node.js & npm
--   Cloudflare Wrangler CLI (`npm install -g wrangler`)
-
-### Setup
-1.  **Clone the repo**:
-    ```bash
-    git clone https://github.com/SupremeMuhit/fluppy.git
-    cd fluppy
-    ```
-2.  **Install dependencies** (if using any backend libs):
-    ```bash
-    npm install
-    ```
-
-### Local Development
-To run the worker locally:
-```bash
-wrangler dev
-```
-To run the frontend, simply open `public/index.html` or use a static server.
-
-### Deploy
-Deploy the Worker:
-```bash
-wrangler deploy
-```
-Deploy the Frontend (Cloudflare Pages):
--   Connect your GitHub repo to Cloudflare Pages.
--   Set Build Output Directory to `public`.
-
-## 📂 Project Structure
--   `/public`: Static game files (HTML, CSS, JS).
--   `/workers`: Backend logic (`basic-ip-logger.js`).
--   `wrangler.toml`: Cloudflare configuration.
+| Platform | Movement |
+| :--- | :--- |
+| **PC** | **WASD** or **Arrow Keys** |
+| **Mobile** | **Swipe Gestures** or **On-Screen D-Pad** |
 
 ---
 *Created by SupremeMuhit*
