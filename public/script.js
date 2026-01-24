@@ -10,8 +10,25 @@ fetch(LOG_URL).catch(e => {
   // console.warn("Logging disabled or failed", e);
 });
 
+// --- FIREBASE CONFIG (PLACEHOLDER) ---
+// REPLACE THIS WITH YOUR OWN FIREBASE CONFIG FROM CONSOLE
+const firebaseConfig = {
+  apiKey: "AIzaSyDCIKT3APSp-vDSoht0pdCHExitPf0KrjE", // Please Dont Steal My API
+  authDomain: "fluppy-snake.firebaseapp.com", // Please Dont Steal My API
+  projectId: "fluppy-snake", // Please Dont Steal My API
+  storageBucket: "fluppy-snake.firebasestorage.app", // Please Dont Steal My API
+  messagingSenderId: "1050595465276", // Please Dont Steal My API
+  appId: "1:1050595465276:web:a9f3d53b2d639d287c8b39" // Please Dont Steal My API
+};
 
-let app, db; // Placeholders for now, effectively disabled
+let app, db;
+try {
+  app = firebase.initializeApp(firebaseConfig);
+  db = firebase.database();
+  console.log("Firebase initialized (Compat mode)");
+} catch(e) {
+  console.error("Firebase init error (Did you set config?):", e);
+}
 
 const CONFIG = {
   cols: 25,
@@ -72,6 +89,15 @@ let game = {
 };
 
 // MULTIPLAYER STATE
+let mp = {
+  isActive: false,
+  roomCode: null,
+  playerId: null, // 'p1' or 'p2'
+  remoteSnake: [],
+  remoteDir: {x:0,y:0},
+  isWaiting: false,
+  connected: false
+};
 
 
 // Set initial default size
@@ -89,27 +115,27 @@ const modeEl = document.getElementById('current-mode');
 
 class Grid {
   static init() {
+    // Determine size based on settings
     const sizeConfig = SIZES[game.settings.size];
     CONFIG.cols = sizeConfig.w;
     CONFIG.rows = sizeConfig.h;
     
+    // Responsive Sizing
+    // Fit canvas into the game-left area
     const container = document.getElementById('game-left');
-    // Ensure we have a valid container size, fallback to screen dimensions if needed
-    let maxWidth = container.clientWidth || window.innerWidth * 0.6;
-    let maxHeight = container.clientHeight || window.innerHeight * 0.7;
-
-    // Apply padding and HUD room
-    maxWidth -= 40;
-    maxHeight -= 100;
+    // available space (fallback to 400x400 if clientWidth is 0)
+    const maxWidth = (container.clientWidth || 400) - 40;
+    const maxHeight = (container.clientHeight || 400) - 100; // room for HUD
     
     const maxDimension = Math.min(maxWidth, maxHeight, 800);
     
     // Calculate cell size to best fit the grid into the box
     CONFIG.cellSize = Math.floor(maxDimension / Math.max(CONFIG.cols, CONFIG.rows)) || 20;
-    if (CONFIG.cellSize < 5) CONFIG.cellSize = 5; // Minimum cell size
     
     canvas.width = CONFIG.cols * CONFIG.cellSize;
     canvas.height = CONFIG.rows * CONFIG.cellSize;
+    
+    // JS Grid drawing handles this now
   }
 
   static generateMap(type) {
@@ -146,10 +172,15 @@ class Grid {
 
 function toggleSidebar(mode) {
   const menu = document.getElementById('sidebar-menu');
+  const hud = document.getElementById('sidebar-game');
   if (mode === 'GAME') {
     menu.style.display = 'none';
+    hud.style.display = 'flex';
+    hud.classList.remove('hidden');
   } else {
     menu.style.display = 'block';
+    hud.style.display = 'none';
+    hud.classList.add('hidden');
   }
 }
 
@@ -160,7 +191,7 @@ function updateClock() {
   const seconds = game.timeRemaining % 60;
   const str = `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
   
-  document.getElementById('game-time').textContent = str;
+  document.getElementById('game-time-large').textContent = str;
   // Also existing tiny mode text if needed, but we hide sidebar settings now
   
   if (game.timeRemaining <= 0) {
@@ -174,17 +205,36 @@ function updateClock() {
 function startGame() {
   document.getElementById('preview-overlay').style.opacity = '0';
   document.getElementById('game-over').classList.add('hidden');
+  document.getElementById('mp-popup').classList.add('hidden'); // Ensure mp popup is gone
   
-  toggleSidebar('MENU'); // Ensure standard sidebar for Single Player
+  if (mp.isActive) {
+    toggleSidebar('GAME');
+    document.getElementById('mp-room-display').textContent = mp.roomCode;
+  } else {
+    toggleSidebar('MENU'); // Ensure standard sidebar for Single Player
+  }
   Grid.init();
   
   // Logic Setup
   const centerX = Math.floor(CONFIG.cols / 2);
   const centerY = Math.floor(CONFIG.rows / 2);
   
-  game.snake = [{x: centerX, y: centerY}, {x: centerX-1, y: centerY}, {x: centerX-2, y: centerY}];
-  game.dir = {x: 1, y: 0};
-  game.nextDir = {x: 1, y: 0};
+  // DIFFERENT SPAWNS FOR MP
+  if (mp.isActive) {
+    if (mp.playerId === 'p1') {
+      game.snake = [{x: 5, y: centerY}, {x: 4, y: centerY}, {x: 3, y: centerY}];
+      game.dir = {x: 1, y: 0};
+      game.nextDir = {x: 1, y: 0};
+    } else {
+      game.snake = [{x: CONFIG.cols - 6, y: centerY}, {x: CONFIG.cols - 5, y: centerY}, {x: CONFIG.cols - 4, y: centerY}];
+      game.dir = {x: -1, y: 0};
+      game.nextDir = {x: -1, y: 0};
+    }
+  } else {
+    game.snake = [{x: centerX, y: centerY}, {x: centerX-1, y: centerY}, {x: centerX-2, y: centerY}];
+    game.dir = {x: 1, y: 0};
+    game.nextDir = {x: 1, y: 0};
+  }
   
   game.score = 0;
   game.active = true;
@@ -195,7 +245,7 @@ function startGame() {
   const timeSetting = TIMES[game.settings.time];
   game.timeRemaining = timeSetting.val;
   // Initial clock Render
-  if(game.timeRemaining === Infinity) document.getElementById('game-time').textContent = "∞";
+  if(game.timeRemaining === Infinity) document.getElementById('game-time-large').textContent = "--:--";
   else updateClock(); // Render start immediately
   
   if (game.clockTimer) clearInterval(game.clockTimer);
@@ -203,14 +253,13 @@ function startGame() {
       game.clockTimer = setInterval(updateClock, 1000);
   }
 
-  const modeType = MODES[game.settings.mode];
-  if (modeType === 'POISON') game.poison = spawnFood();
-  if (modeType === 'SURVIVAL') game.obstacles = []; // Clear obstacles for new survival run
+  if (MODES[game.settings.mode] === 'POISON') game.poison = spawnFood();
+  if (MODES[game.settings.mode] === 'SURVIVAL') game.obstacles = []; // Clear obstacles for new survival run
   
   // Apply Settings
   const mapType = MAPS[game.settings.map];
   // Only regenerate map if NOT survival (survival builds map as you go)
-  if (modeType !== 'SURVIVAL') Grid.generateMap(mapType);
+  if (MODES[game.settings.mode] !== 'SURVIVAL') Grid.generateMap(mapType);
   else Grid.generateMap('BOX'); // Survival starts clean usually
   
   // SAFETY NET: NUKE OBSTACLES NEAR SPAWN
@@ -218,7 +267,8 @@ function startGame() {
   const cy = Math.floor(CONFIG.rows / 2);
   game.obstacles = game.obstacles.filter(o => Math.abs(o.x - cx) > 4 || Math.abs(o.y - cy) > 4);
 
-  modeEl.textContent = `${modeType} (${DIFFICULTIES[game.settings.diff]})`;
+  const modeType = MODES[game.settings.mode];
+  modeEl.textContent = mp.isActive ? `MULTIPLAYER (${mp.roomCode})` : `${modeType} (${DIFFICULTIES[game.settings.diff]})`;
   
   updateScore(0);
   
@@ -330,6 +380,16 @@ function update() {
     game.snake.pop();
   }
   
+  // --- SYNC MULTIPLAYER ---
+  if (mp.isActive && mp.roomCode && db) {
+     // Write local state
+     const playerRef = db.ref(`rooms/${mp.roomCode}/players/${mp.playerId}`);
+     playerRef.set({
+       snake: game.snake,
+       score: game.score,
+       active: game.active
+     });
+  }
 
   draw();
 }
@@ -420,6 +480,26 @@ function draw() {
     }
   });
 
+  // Draw REMOTE Snake
+  if (mp.isActive && mp.remoteSnake && mp.remoteSnake.length > 0) {
+    // Use a distinct color for P2/Opponent (e.g., Red or opposite of theme)
+    // For now, use a fixed color or variation of accent
+    const remoteColor = '#ff5555'; // Reddish for opponent
+    
+    mp.remoteSnake.forEach((seg, i) => {
+      ctx.fillStyle = remoteColor;
+      ctx.shadowBlur = i === 0 ? 10 : 0;
+      ctx.shadowColor = remoteColor;
+      ctx.fillRect(seg.x * cs + pd, seg.y * cs + pd, cs - pd*2, cs - pd*2);
+      
+      if (i === 0) {
+          ctx.fillStyle = '#fff';
+          const eyeSize = cs/5;
+          ctx.fillRect(seg.x*cs+cs*0.2, seg.y*cs+cs*0.2, eyeSize, eyeSize);
+          ctx.fillRect(seg.x*cs+cs*0.6, seg.y*cs+cs*0.2, eyeSize, eyeSize);
+      }
+    });
+  }
 
   ctx.shadowBlur = 0;
 }
@@ -457,6 +537,12 @@ function addRandomObstacle() {
 
 function updateScore(s) {
   scoreEl.textContent = s;
+  
+  // In MP, update specific labels
+  if (mp.isActive && mp.playerId) {
+    document.getElementById('score-p1').textContent = mp.playerId === 'p1' ? s : (mp.remoteScore || 0);
+    document.getElementById('score-p2').textContent = mp.playerId === 'p2' ? s : (mp.remoteScore || 0);
+  }
 }
 
 function showFloatingText(text, pos) {
@@ -502,19 +588,24 @@ function gameOver() {
   // Hide High Score message initially
   newHighScoreEl.classList.add('hidden');
 
-  const saved = parseInt(localStorage.getItem('snakeHighScore')) || 0;
-  if (game.score > saved) {
-      localStorage.setItem('snakeHighScore', game.score);
-      newHighScoreEl.classList.remove('hidden');
-      updateMenuHighScore(); // Ensure this exists or is removed if redundant
+  if (!mp.isActive) { // Only track high score in Single Player
+    const saved = parseInt(localStorage.getItem('snakeHighScore')) || 0;
+    if (game.score > saved) {
+        localStorage.setItem('snakeHighScore', game.score);
+        newHighScoreEl.classList.remove('hidden');
+        updateMenuHighScore(); // Ensure this exists or is removed if redundant
+    }
+    
+    // Generate Details String: "Medium - 20x20"
+    const diff = DIFFICULTIES[game.settings.diff];
+    const size = SIZES[game.settings.size].label;
+    const details = `${diff} - ${size}`;
+    
+    updateLeaderboard(game.score, details);
+  } else {
+    // Multiplayer Game Over logic?
+    // cleanup
   }
-  
-  // Generate Details String: "Medium - 20x20"
-  const diff = DIFFICULTIES[game.settings.diff];
-  const size = SIZES[game.settings.size].label;
-  const details = `${diff} - ${size}`;
-  
-  updateLeaderboard(game.score, details);
 }
 
 
@@ -571,7 +662,209 @@ function renderLeaderboard(entries) {
   }
 }
 
+// CREATE ROOM LOCAL STATE
+const createSettings = {
+  mode: 'PVP',
+  map: 'BOX',
+  diff: 1
+};
 
+const MP_MODES = ['PVP', 'FRIENDLY'];
+const MP_MAPS = ['BOX', 'INFINITE'];
+
+function updateCreateUI() {
+  document.getElementById('mp-create-mode-val').textContent = createSettings.mode;
+  document.getElementById('mp-create-map-val').textContent = createSettings.map === 'BOX' ? 'WALLED' : 'INFINITE';
+  document.getElementById('mp-create-diff-val').textContent = DIFFICULTIES[createSettings.diff];
+}
+
+function handleCreateSetting(type, dir) {
+   if (type === 'mode') {
+     let idx = MP_MODES.indexOf(createSettings.mode);
+     if (dir === 'next') idx = (idx + 1) % MP_MODES.length;
+     else idx = (idx - 1 + MP_MODES.length) % MP_MODES.length;
+     createSettings.mode = MP_MODES[idx];
+   }
+   if (type === 'map') {
+     let idx = MP_MAPS.indexOf(createSettings.map);
+     if (dir === 'next') idx = (idx + 1) % MP_MAPS.length;
+     else idx = (idx - 1 + MP_MAPS.length) % MP_MAPS.length;
+     createSettings.map = MP_MAPS[idx];
+   }
+   if (type === 'diff') {
+     let idx = createSettings.diff;
+     if (dir === 'next') idx = (idx + 1) % DIFFICULTIES.length;
+     else idx = (idx - 1 + DIFFICULTIES.length) % DIFFICULTIES.length;
+     createSettings.diff = idx;
+   }
+   updateCreateUI();
+}
+
+// Bind Create Room Selectors
+document.getElementById('btn-create-mode-prev').addEventListener('click', () => handleCreateSetting('mode', 'prev'));
+document.getElementById('btn-create-mode-next').addEventListener('click', () => handleCreateSetting('mode', 'next'));
+document.getElementById('btn-create-map-prev').addEventListener('click', () => handleCreateSetting('map', 'prev'));
+document.getElementById('btn-create-map-next').addEventListener('click', () => handleCreateSetting('map', 'next'));
+document.getElementById('btn-create-diff-prev').addEventListener('click', () => handleCreateSetting('diff', 'prev'));
+document.getElementById('btn-create-diff-next').addEventListener('click', () => handleCreateSetting('diff', 'next'));
+
+function switchMpView(viewId) {
+  ['mp-view-select', 'mp-view-create', 'mp-view-join', 'mp-status'].forEach(id => {
+    document.getElementById(id).classList.add('hidden');
+  });
+  document.getElementById(viewId).classList.remove('hidden');
+}
+
+function initMultiplayer() {
+  const mpBtn = document.getElementById('mp-btn');
+  const mpPopup = document.getElementById('mp-popup');
+  
+  // Main Menu Buttons
+  document.getElementById('btn-select-create').addEventListener('click', () => {
+    updateCreateUI();
+    switchMpView('mp-view-create');
+  });
+  document.getElementById('btn-select-join').addEventListener('click', () => switchMpView('mp-view-join'));
+  document.getElementById('btn-mp-close').addEventListener('click', () => {
+    mpPopup.classList.add('hidden');
+    mpPopup.style.display = 'none';
+  });
+
+  // Back Buttons
+  document.querySelectorAll('.btn-back').forEach(btn => {
+    btn.addEventListener('click', () => switchMpView('mp-view-select'));
+  });
+
+  // CREATE Action
+  document.getElementById('btn-do-create').addEventListener('click', () => {
+    const code = document.getElementById('mp-create-code').value;
+    if(code.length !== 5) return alert("Enter 5-digit code");
+    
+    // Use local createSettings
+    startMpAction('CREATE', code, createSettings);
+  });
+
+  // JOIN Action
+  document.getElementById('join-room-btn').addEventListener('click', () => {
+    const code = document.getElementById('room-code-input').value;
+    if(code.length !== 5) return alert("Enter 5-digit code");
+    startMpAction('JOIN', code);
+  });
+
+  // Cancel Wait
+  document.getElementById('cancel-wait-btn').addEventListener('click', () => {
+     mpPopup.style.display = 'none'; 
+     mpPopup.classList.add('hidden');
+     window.location.reload(); 
+  });
+  
+  // Open Popup
+  mpBtn.addEventListener('click', () => {
+    mpPopup.classList.remove('hidden');
+    mpPopup.style.display = 'block';
+    switchMpView('mp-view-select');
+  });
+}
+
+async function startMpAction(action, code, settings = null) {
+  if (!db) return alert("DB Error");
+
+  switchMpView('mp-status');
+  document.getElementById('mp-status-text').textContent = action === 'CREATE' ? "CREATING ROOM..." : "CONNECTING...";
+  
+  mp.roomCode = code;
+  mp.isActive = true;
+
+  try {
+     const roomBase = `rooms/${code}`;
+     const dbRef = db.ref();
+     
+     if (action === 'CREATE') {
+         // Check if exists
+         const snap = await dbRef.child(roomBase + '/players/p1').get();
+         if (snap.exists()) {
+             alert("Room already exists! Try another code.");
+             return switchMpView('mp-view-create');
+         }
+         
+         // Set Settings
+         await db.ref(roomBase + '/settings').set(settings);
+         
+         // Join as P1
+         mp.playerId = 'p1';
+         const p1Ref = db.ref(roomBase + '/players/p1');
+         await p1Ref.set({ active: true, snake: [] });
+         p1Ref.onDisconnect().remove();
+         
+         // Apply Local Settings
+         game.settings.map = MAPS.indexOf(settings.map);
+         game.settings.diff = settings.diff;
+         
+         document.getElementById('mp-status-text').textContent = "WAITING FOR P2...";
+
+     } else {
+         // JOIN
+         const snap = await dbRef.child(roomBase + '/settings').get();
+         if (!snap.exists()) {
+             alert("Room does not exist!");
+             return switchMpView('mp-view-join');
+         }
+         
+         const hostSettings = snap.val();
+         
+         // Check P2 slot
+         const p2Snap = await dbRef.child(roomBase + '/players/p2').get();
+         if (p2Snap.exists()) {
+             alert("Room full!");
+             return switchMpView('mp-view-join');
+         }
+         
+         mp.playerId = 'p2';
+         const p2Ref = db.ref(roomBase + '/players/p2');
+         await p2Ref.set({ active: true, snake: [] });
+         p2Ref.onDisconnect().remove();
+         
+         // Sync Local Settings
+         game.settings.map = MAPS.indexOf(hostSettings.map);
+         game.settings.diff = hostSettings.diff;
+         
+         // Store MP specific settings for logic
+         mp.settings = hostSettings; 
+         
+         document.getElementById('mp-status-text').textContent = "CONNECTED! WAITING FOR HOST...";
+     }
+     
+     mp.connected = true;
+     
+     // LISTEN FOR OPPONENT
+     const otherId = mp.playerId === 'p1' ? 'p2' : 'p1';
+     db.ref(`rooms/${code}/players/${otherId}`).on('value', (snap) => {
+         const data = snap.val();
+         if (data && data.active) {
+             mp.remoteSnake = data.snake || [];
+             if (data.score !== undefined) mp.remoteScore = data.score;
+             
+             if (!game.active && document.getElementById('mp-popup').style.display !== 'none') {
+                 startGame();
+             }
+         } else {
+             mp.remoteSnake = [];
+             mp.remoteScore = 0;
+         }
+     });
+
+  } catch(e) {
+      console.error(e);
+      alert("Connection Failed: " + (e.code || e.message));
+      switchMpView('mp-view-select');
+  }
+}
+
+initMultiplayer();
+
+// ==========================================
+// UI & INPUTS
+// ==========================================
 
 function updateSettingsUI() {
   document.getElementById('theme-value').textContent = THEMES[game.settings.theme];
@@ -651,9 +944,10 @@ document.querySelectorAll('.arrow-btn').forEach(btn => {
   });
 });
 
-
 function exitGame() {
   game.active = false;
+  mp.isActive = false; // Disable MP if valid
+  mp.connected = false;
   if (game.timer) clearInterval(game.timer);
   if (game.clockTimer) clearInterval(game.clockTimer);
   
@@ -665,7 +959,12 @@ function exitGame() {
   drawPreview(); // Show start
 }
 
+document.getElementById('exit-btn').addEventListener('click', exitGame);
 
+// About Btn in MP
+document.getElementById('about-btn-mp').addEventListener('click', () => {
+    document.getElementById('about-panel').classList.add('open');
+});
 
 // Mobile Bottom Bar Logic
 document.getElementById('mob-start-btn').addEventListener('click', startGame);
@@ -682,12 +981,16 @@ document.getElementById('game-left').addEventListener('click', () => {
 });
 
 document.getElementById('start-btn').addEventListener('click', () => {
+  mp.isActive = false; // Force single player
   startGame();
 });
 
 document.getElementById('restart-btn').addEventListener('click', () => {
    // Reset inline style for safety
    document.getElementById('game-over').style.display = 'none';
+   if (mp.isActive) {
+     // Mp restart logic?
+   }
    startGame();
 });
 
@@ -790,13 +1093,10 @@ document.addEventListener('touchend', e => {
   }
 });
 
-// Initial Setup with a small delay to ensure layout is ready
-setTimeout(() => {
-  renderLeaderboard();
-  updateSettingsUI();
-  document.getElementById('game-over').classList.add('hidden');
-}, 100);
-
+// Force Hide Game Over on Init
+document.getElementById('game-over').classList.add('hidden');
+renderLeaderboard();
+updateSettingsUI();
 window.addEventListener('resize', () => { 
   Grid.init(); 
   if(!game.active) drawPreview();

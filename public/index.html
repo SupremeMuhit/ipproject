@@ -10,6 +10,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
   
+  <!-- Firebase Compat Scripts for non-module support (file:// protocol) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 </head>
 <body>
   
@@ -28,7 +31,6 @@
         <div class="hud">
           <div class="hud-item">SCORE: <span id="current-score">0</span></div>
           <div class="hud-item">MODE: <span id="current-mode">CLASSIC</span></div>
-          <div class="hud-item">TIME: <span id="game-time">∞</span></div>
         </div>
         
         <div class="canvas-wrapper">
@@ -54,6 +56,70 @@
             </div>
           </div>
 
+          <!-- POPUP: MULTIPLAYER SETUP -->
+          <div id="mp-popup" class="hidden" style="display: none;">
+            <h2>MULTIPLAYER <span style="font-size:0.8rem; color:var(--accent-color)">BETA</span></h2>
+            
+            <!-- VIEW 1: SELECTION -->
+            <div id="mp-view-select">
+               <button id="btn-select-create" class="glow-btn filled full-width" style="margin-bottom:10px;">CREATE ROOM</button>
+               <button id="btn-select-join" class="glow-btn outline full-width">JOIN ROOM</button>
+               <button id="btn-mp-close" class="glow-btn outline small full-width" style="margin-top:20px; border:none;">CANCEL</button>
+            </div>
+
+            <!-- VIEW 2: CREATE ROOM -->
+            <div id="mp-view-create" class="hidden">
+               <!-- Custom Selectors matching Main Menu -->
+               <div class="setting-group" style="margin-bottom: 10px;">
+                 <label>GAME MODE</label>
+                 <div class="selector">
+                   <button class="arrow-btn" id="btn-create-mode-prev">◄</button>
+                   <span class="value" id="mp-create-mode-val" data-val="PVP">PVP</span>
+                   <button class="arrow-btn" id="btn-create-mode-next">►</button>
+                 </div>
+               </div>
+               
+               <div class="setting-group" style="margin-bottom: 10px;">
+                 <label>MAP TYPE</label>
+                 <div class="selector">
+                   <button class="arrow-btn" id="btn-create-map-prev">◄</button>
+                   <span class="value" id="mp-create-map-val" data-val="BOX">WALLED</span>
+                   <button class="arrow-btn" id="btn-create-map-next">►</button>
+                 </div>
+               </div>
+               
+               <div class="setting-group" style="margin-bottom: 10px;">
+                 <label>DIFFICULTY</label>
+                 <div class="selector">
+                   <button class="arrow-btn" id="btn-create-diff-prev">◄</button>
+                   <span class="value" id="mp-create-diff-val" data-val="1">MEDIUM</span>
+                   <button class="arrow-btn" id="btn-create-diff-next">►</button>
+                 </div>
+               </div>
+
+               <div class="setting-group">
+                 <label>ROOM CODE (5-Digits)</label>
+                 <input type="number" id="mp-create-code" placeholder="12345" max="99999" style="width:100%; background:#222; color:#fff; border:1px solid var(--primary-color); text-align:center; padding:8px; font-family: var(--font-display);">
+               </div>
+               <button id="btn-do-create" class="glow-btn filled full-width" style="margin-top:15px;">CREATE & HOST</button>
+               <button class="btn-back glow-btn outline small full-width" style="margin-top:10px;">BACK</button>
+            </div>
+
+            <!-- VIEW 3: JOIN ROOM -->
+            <div id="mp-view-join" class="hidden">
+              <p>Enter 5-digit Room Code</p>
+              <input type="number" id="room-code-input" placeholder="12345" max="99999" style="padding: 10px; width: 100%; margin: 10px 0; background: #222; color: #fff; border: 1px solid var(--primary-color); text-align: center; font-family: var(--font-display);">
+              <button id="join-room-btn" class="glow-btn filled full-width">JOIN ROOM</button>
+              <button class="btn-back glow-btn outline small full-width" style="margin-top:10px;">BACK</button>
+            </div>
+
+            <!-- VIEW 4: STATUS -->
+            <div id="mp-status" class="hidden">
+              <p id="mp-status-text">CONNECTING...</p>
+              <div class="loader" style="margin: 20px auto;"></div>
+              <button id="cancel-wait-btn" class="glow-btn outline small full-width">CANCEL</button>
+            </div>
+          </div>
         </div>
 
         <!-- Mobile Controls (Visible only on touch) -->
@@ -145,6 +211,10 @@
               <button id="start-btn" class="glow-btn filled" style="flex: 2;">START GAME</button>
               <button id="help-btn" class="glow-btn outline" style="flex: 1;">HELP</button>
             </div>
+            <button id="mp-btn" class="glow-btn outline full-width" style="margin-top: 10px; position: relative;">
+              MULTIPLAYER 
+              <span style="font-size: 0.5rem; vertical-align: super; color: var(--accent-color); position: absolute; top: 5px; right: 10px;">BETA</span>
+            </button>
             
             <!-- LEADERBOARD for Single Player -->
             <div class="leaderboard-panel" style="margin-top: 20px;">
@@ -157,6 +227,54 @@
             <button id="about-btn" class="glow-btn outline full-width" style="margin-top: 10px;">ABOUT & CREDITS</button>
         </div>
 
+        <!-- MULTIPLAYER GAME PANEL (Only for MP) -->
+        <div id="sidebar-game" class="hidden" style="display: none;">
+            <!-- 1. Header Row (Split) -->
+            <div class="mp-header-split" style="display: flex; gap: 0; margin-bottom: 20px; border: 2px solid var(--primary-color);">
+                <div style="flex: 1; padding: 10px; border-right: 2px solid var(--primary-color); display:flex; align-items:center; justify-content:center;">
+                    <span style="font-size:1rem; font-weight:bold; color:var(--primary-color);">Multiplayer</span>
+                </div>
+                <div style="flex: 1; padding: 10px; display:flex; align-items:center; justify-content:center;">
+                    <span id="mp-room-display" style="font-size:1rem; color:var(--text-color);">room number</span>
+                </div>
+            </div>
+            
+            <!-- 2. Main Stats Container (The Box with Time + Scores) -->
+            <div class="mp-stats-box" style="border: 2px solid var(--primary-color); padding: 10px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px;">
+                
+                <!-- Time (Top of box) -->
+                <div style="border: 2px solid var(--primary-color); padding: 10px; text-align: center;">
+                    <label style="display:block; font-size:0.8rem; margin-bottom:5px; color:var(--text-color);">Time</label>
+                    <div id="game-time-large" style="font-size: 2rem; line-height:1; color:var(--primary-color);">--:--</div>
+                </div>
+
+                <!-- Scores (Bottom of box, Split) -->
+                <div style="display: flex; border: 2px solid var(--primary-color);">
+                    <!-- PLAYER 1 -->
+                    <div style="flex: 1; border-right: 2px solid var(--primary-color); padding: 10px; text-align: center; display:flex; flex-direction:column;">
+                        <span style="font-size:0.9rem; margin-bottom:10px; color:var(--primary-color);">PLAYER 1</span>
+                        <div id="score-p1" style="font-size:2.5rem; font-weight:bold; color:var(--text-color);">0</div>
+                    </div>
+                    <!-- PLAYER 2 -->
+                    <div style="flex: 1; padding: 10px; text-align: center; display:flex; flex-direction:column;">
+                        <span style="font-size:0.9rem; margin-bottom:10px; color:#ff5555;">PLAYER 2</span>
+                        <div id="score-p2" style="font-size:2.5rem; font-weight:bold; color:var(--text-color);">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Leave Room Button -->
+            <button id="exit-btn" class="glow-btn outline full-width" style="margin-bottom: 20px; border-color:var(--primary-color); color:var(--text-color);">
+                LEAVE ROOM
+            </button>
+            
+            <div style="flex-grow: 1;"></div> <!-- Spacer -->
+            
+            <!-- 4. About Button (Bottom) -->
+            <button id="about-btn-mp" class="glow-btn outline full-width" style="border-color:var(--primary-color); color:var(--text-color);">
+                ABOUT
+            </button>
+        </div>
 
       </div>
 
@@ -208,6 +326,14 @@
     <div class="about-content">
       <h2>ABOUT FLUPPY SNAKE</h2>
       <p>A retro-futuristic snake game built for pure arcade fun. Experience the evolution of a classic with modern professional themes and challenging modes.</p>
+
+      <h3>HOW TO PLAY</h3>
+      <div class="how-to-play" style="font-size: 0.8rem; line-height: 1.4; color: var(--text-color); opacity: 0.9;">
+        <p><strong>Controls:</strong> Use WASD or Arrow Keys on PC. Swipe or use the D-Pad on mobile.</p>
+        <p><strong>Objective:</strong> Eat food (colored dots) to grow and earn points. Avoid hitting the walls or your own tail.</p>
+        <p><strong>Modes:</strong> Explore different modes like Speed, Survival, and Zen for unique challenges.</p>
+        <p><strong>Pro Tip:</strong> The border wall is color-coded to your theme—stay away to keep your streak alive!</p>
+      </div>
       
       <h3>CREDITS</h3>
       <ul style="font-size: 0.8rem; list-style: none;">
@@ -215,13 +341,16 @@
           <strong>Design, Layout, Themes, Everything except game functions:</strong><br>
           - <em><b>SupremeMuhit</b></em>
         </li>
+        <li>
+          <strong>Game Functions/JS:</strong> Antigravity Agent<br>
+        </li>
       </ul>
 
       <h3>LINKS</h3>
       <div class="about-links">
         <a href="https://github.com/suprememuhit" target="_blank">GitHub</a>
         <a href="https://youtube.com/@SupremeMuhit" target="_blank">YouTube</a>
-        <a href="https://discord.com/users/1341440502104592507" target="_blank">Discord (suprememuhit)</a>
+        <a href="#" class="social-btn discord">Discord (suprememuhit)</a>
         <a href="https://x.com/suprememuhit" target="_blank">Twitter / X</a>
         <a href="https://instagram.com/suprememuhit" target="_blank">Instagram</a>
       </div>
