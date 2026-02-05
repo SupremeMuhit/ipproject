@@ -210,14 +210,20 @@
   -webkit-touch-callout: none;
 }
 
+html, body {
+  height: 100%;
+  width: 100%;
+}
+
 body {
   background-color: var(--bg-color);
   color: var(--text-color);
   font-family: var(--font-main);
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
   height: 100vh;
   width: 100vw;
+  overscroll-behavior: none;
+  touch-action: none;
   transition: background-color 0.5s ease, color 0.5s ease;
 }
 
@@ -273,6 +279,7 @@ body {
   height: 100%;
   z-index: 20;
   position: relative;
+  overflow: hidden;
 }
 
 #game-left {
@@ -320,7 +327,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 15px; /* Spacing between elements */
-  overflow: hidden; /* Prevent sidebar scroll for layout */
+  overflow: visible; /* Avoid clipping buttons/glow */
 }
 
 .settings-grid {
@@ -792,6 +799,16 @@ body {
 /* ACTION BUTTONS GROUP */
 .action-buttons {
   margin-bottom: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.action-buttons .glow-btn {
+  width: auto;
+  min-width: 0;
 }
 
 /* BUTTON STYLES */
@@ -803,6 +820,7 @@ body {
   text-transform: uppercase;
   transition: 0.2s;
   width: 100%;
+  box-sizing: border-box;
 }
 
 /* FILLED BUTTON (Start, Try Again) */
@@ -923,8 +941,9 @@ canvas {
   #game-layout {
     flex-direction: column;
     flex: 1;
-    height: auto;
+    height: 100dvh;
     overflow: hidden;
+    padding-bottom: 90px;
   }
   
   #game-left {
@@ -932,6 +951,25 @@ canvas {
     padding: 10px;
     align-items: flex-start; /* Move game closer to top */
     overflow: hidden;
+  }
+
+  #game-ui {
+    height: 100%;
+    justify-content: space-between;
+  }
+
+  .settings-grid {
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .setting-group label {
+    font-size: 0.75rem;
+  }
+
+  .value {
+    width: 70px;
+    font-size: 0.8rem;
   }
   
   .canvas-wrapper {
@@ -987,10 +1025,18 @@ canvas {
   /* Show Bottom Bar */
   #mobile-bottom-bar {
     display: flex;
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    margin-top: 0;
   }
   
   .leaderboard-panel {
-    display: flex; /* Show leaderboard in drawer */
+    display: none; /* Hide leaderboard to reduce clutter */
+  }
+
+  #about-btn {
+    display: none;
   }
 
   .mobile-msg { display: block; }
