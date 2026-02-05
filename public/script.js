@@ -566,6 +566,7 @@ function updateSettingsUI() {
   document.getElementById('diff-value').textContent = DIFFICULTIES[game.settings.diff];
   document.getElementById('size-value').textContent = SIZES[game.settings.size].label;
   document.getElementById('time-value').textContent = TIMES[game.settings.time].label;
+  updateDropdownActiveStates();
   
   document.body.setAttribute('data-theme', THEMES[game.settings.theme]);
   
@@ -574,6 +575,57 @@ function updateSettingsUI() {
     Grid.init();
     drawPreview();
   }
+}
+
+const SETTINGS_OPTIONS = {
+  theme: THEMES,
+  mode: MODES,
+  map: MAPS,
+  diff: DIFFICULTIES,
+  size: SIZES,
+  time: TIMES
+};
+
+function buildDropdownMenus() {
+  Object.keys(SETTINGS_OPTIONS).forEach((target) => {
+    const menu = document.querySelector(`.dropdown-menu[data-target="${target}"]`);
+    if (!menu) return;
+    menu.innerHTML = '';
+    SETTINGS_OPTIONS[target].forEach((option, index) => {
+      const item = document.createElement('button');
+      item.type = 'button';
+      item.className = 'dropdown-item';
+      item.textContent = typeof option === 'string' ? option : option.label;
+      item.dataset.target = target;
+      item.dataset.index = index;
+      item.addEventListener('click', () => {
+        game.settings[target] = index;
+        updateSettingsUI();
+        closeAllDropdowns();
+      });
+      menu.appendChild(item);
+    });
+  });
+}
+
+function updateDropdownActiveStates() {
+  Object.keys(SETTINGS_OPTIONS).forEach((target) => {
+    const menu = document.querySelector(`.dropdown-menu[data-target="${target}"]`);
+    if (!menu) return;
+    menu.querySelectorAll('.dropdown-item').forEach((item) => {
+      const index = Number(item.dataset.index);
+      item.classList.toggle('active', index === game.settings[target]);
+    });
+  });
+}
+
+function closeAllDropdowns() {
+  document.querySelectorAll('.dropdown-menu').forEach((menu) => {
+    menu.classList.remove('open');
+  });
+  document.querySelectorAll('.dropdown-toggle').forEach((toggle) => {
+    toggle.setAttribute('aria-expanded', 'false');
+  });
 }
 
 function drawPreview() {
@@ -635,6 +687,28 @@ document.querySelectorAll('.arrow-btn').forEach(btn => {
   btn.addEventListener('click', (e) => {
     handleSetting(e.target.dataset.action, e.target.dataset.target);
   });
+});
+
+// Dropdown Toggles for Settings
+document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
+  toggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const target = toggle.dataset.target;
+    const menu = document.querySelector(`.dropdown-menu[data-target="${target}"]`);
+    if (!menu) return;
+    const isOpen = menu.classList.contains('open');
+    closeAllDropdowns();
+    if (!isOpen) {
+      menu.classList.add('open');
+      toggle.setAttribute('aria-expanded', 'true');
+    }
+  });
+});
+
+document.addEventListener('click', (event) => {
+  if (!event.target.closest('.dropdown')) {
+    closeAllDropdowns();
+  }
 });
 
 // Mobile Bottom Bar Logic
@@ -763,6 +837,7 @@ document.addEventListener('touchend', e => {
 // Force Hide Game Over on Init
 document.getElementById('game-over').classList.add('hidden');
 renderLeaderboard();
+buildDropdownMenus();
 updateSettingsUI();
 window.addEventListener('resize', () => { 
   Grid.init(); 
